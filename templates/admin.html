@@ -25,23 +25,16 @@
     <!-- Custom styles for this template-->
     <link href="/static/css/sb-admin-2.min.css" rel="stylesheet">
     <style>
-        .image-grid {
+        .square-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        #imagePreview {
             display: flex;
             flex-wrap: wrap;
-        }
-    
-        .image-item {
-            width: 100px; /* Adjust as needed */
-            height: 100px; /* Adjust as needed */
-            margin-right: 10px;
-            margin-bottom: 10px;
-            overflow: hidden;
-        }
-    
-        .preview-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
     </style>
 </head>
@@ -407,7 +400,7 @@
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                 Earnings (Monthly)</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">$40,000</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"></div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-calendar fa-2x text-gray-300"></i>
@@ -583,13 +576,13 @@
                         <th>Color</th>
                         <th>Variant</th>
                         <th>Kms</th>
-				
                         <th>Ownership</th>
                         <th>Transmission</th>
-                        <th>Image 1</th>
-                      
-                        <th>RegNo</th>
-						<th>Status</th>
+                        <th>Price</th>
+                        <th>BannerImage</th>
+                        <th>Image</th>    
+                            <th>RegNo</th>
+                            <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -609,18 +602,16 @@
                         <td>{{.Kms}}</td>
                         <td>{{.Ownership}}</td>
                         <td>{{.Transmission}}</td>
+                        <td>{{.Price}}</td>
+                        <td> <img src="{{.Bannerimage}}" alt="jack" class="square-image" style="width: 50px; height: auto;"></td>
                         <td>
                             <div class="image-field">
-                                <img src="{{.ImagePath1}}" alt="Image 1" class="square-image" style="width: 100px; height: auto;">
+                                {{range .Images}}
+                                <img src="{{ .Path}}" alt="" class="square-image" style="width: 50px; height: auto;">
+
+                                {{end}}
                             </div>
                         </td>
-                        
-
-
-
-                       
-                
-       
         </div>
                            
                         </td>
@@ -691,33 +682,23 @@
                             <input type="text" name="transmission" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label>Image 1</label>
-                            <input type="file" name="images[]" class="form-control-file" accept="image/*" required>
+                            <label>Price</label>
+                            <input type="text" name="price" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label>Image 2</label>
-                            <input type="file" name="images[]" class="form-control-file" accept="image/*" required>
+                            <label>Banner image</label>
+                            <input type="file" name="bannerimage"   accept="image/*" required>
                         </div>
                         <div class="form-group">
-                            <label>Image 3</label>
-                            <input type="file" name="images[]" class="form-control-file" accept="image/*" required>
+                            <label>Images</label>
+                            <div id="imageInputsContainer">
+                                <input type="file" name="images[]" class="form-control-file image-input" accept="image/*" required>
+                            </div>
+                            <button type="button" id="addImageInput" class="btn btn-primary mt-2">Add Another Image</button>
                         </div>
-                        <div class="form-group">
-                            <label>Image 4</label>
-                            <input type="file" name="images[]" class="form-control-file" accept="image/*" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Image 5</label>
-                            <input type="file" name="images[]" class="form-control-file" accept="image/*" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Image 6</label>
-                            <input type="file" name="images[]" class="form-control-file" accept="image/*" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Image 7</label>
-                            <input type="file" name="images[]" class="form-control-file" accept="image/*" required>
-                        </div>
+                        <div id="imagePreview"></div>
+                    
+                       
                         <div class="form-group">
                             <label>RegNo</label>
                             <input type="text" name="regno" class="form-control" required>
@@ -735,8 +716,8 @@
             </div>
         </div>
     </div>
+    
     {{range .Cars}}
-    <!-- Edit Modal HTML -->
     <div id="editCarModal-{{.ID}}" class="modal fade">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -779,40 +760,29 @@
                             <input type="text" name="transmission" value="{{.Transmission}}" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label>Image 1</label>
-                            <img src="{{.ImagePath1}}" alt="Image 1" style="width: 100px; height: auto;">
-                            <input type="file"  name="images[]" class="form-control-file" accept="image/*">
+                            <label>Price</label>
+                            <input type="text" name="price"  value="{{.Price}}"  class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label>Image 2</label>
-                            <img src="{{.ImagePath2}}" alt="Image 2" style="width: 100px; height: auto;">
-                            <input type="file"  name="images[]" class="form-control-file" accept="image/*">
+                        <label>Banner Image</label>
+                        <img src="{{.Bannerimage}}" alt="Existing Banner Image" style="width: 100px; height: auto;">
+                        <input type="file" name="bannerimage" class="form-control">
                         </div>
+
                         <div class="form-group">
-                            <label>Image 3</label>
-                            <img src="{{.ImagePath3}}" alt="Image 3" style="width: 100px; height: auto;">
-                            <input type="file"  name="images[]" class="form-control-file" accept="image/*">
+                            <label>Images</label>
+                            <div id="existingImages">
+                                {{range .Images}}
+                                    <img src="{{.Path}}" class="existing-image" alt="Existing Image" style="width: 100px; height: auto;">
+                                    <!-- Include a hidden input field to retain existing image paths -->
+                                    <input type="hidden" name="existing_images[]" value="{{.Path}}">
+                                {{end}}
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Image 4</label>
-                            <img src="{{.ImagePath4}}" alt="Image 4" style="width: 100px; height: auto;">
-                            <input type="file"  name="images[]" class="form-control-file" accept="image/*">
-                        </div>
-                        <div class="form-group">
-                            <label>Image 5</label>
-                            <img src="{{.ImagePath5}}" alt="Image 5" style="width: 100px; height: auto;">
-                            <input type="file"  name="images[]" class="form-control-file" accept="image/*">
-                        </div>
-                        <div class="form-group">
-                            <label>Image 6</label>
-                            <img src="{{.ImagePath6}}" alt="Image 6" style="width: 100px; height: auto;">
-                            <input type="file"  name="images[]" class="form-control-file" accept="image/*">
-                        </div>
-                        <div class="form-group">
-                            <label>Image 7</label>
-                            <img src="{{.ImagePath7}}" alt="Image 7" style="width: 100px; height: auto;">
-                            <input type="file"  name="images[]" class="form-control-file" accept="image/*">
-                        </div>
+
+                       
+                        <div id="imagePreview-{{.ID}}" class="image-preview"></div>
+                       
                         <div class="form-group">
                             <label>RegNo</label>
                             <input type="text" name="regno" class="form-control" value="{{.RegNo}}" required>
@@ -830,7 +800,10 @@
             </div>
         </div>
     </div>
-    {{end}}
+{{end}}
+
+
+
    {{range .Cars}}
 	<!-- Delete Modal HTML -->
 	<div id="deleteCarModal-{{.ID}}" class="modal fade">
@@ -905,6 +878,42 @@
         </div>
     </div>
    
+    <script>
+        // Function to add a new file input
+        function addImageInput() {
+            const container = document.getElementById('imageInputsContainer');
+            const newInput = document.createElement('input');
+            newInput.type = 'file';
+            newInput.name = 'images[]';
+            newInput.classList.add('form-control-file', 'image-input');
+            newInput.accept = 'image/*';
+            container.appendChild(newInput);
+        }
+    
+        // Event listener to handle click on the "Add Another Image" button
+        document.getElementById('addImageInput').addEventListener('click', function() {
+            addImageInput();
+        });
+    
+        // Event listener to handle change in file inputs
+        document.getElementById('imageInputsContainer').addEventListener('change', function(event) {
+            if (event.target && event.target.classList.contains('image-input')) {
+                const files = event.target.files;
+                const previewContainer = document.getElementById('imagePreview');
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        const image = new Image();
+                        image.src = reader.result;
+                        image.classList.add('square-image');
+                        previewContainer.appendChild(image);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+    </script>
     <!-- Bootstrap core JavaScript-->
     <script src="/static/vendor/jquery/jquery.min.js"></script>
     <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>

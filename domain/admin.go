@@ -9,15 +9,16 @@ type Car struct {
 	Variant      string
 	Kms          int
 	Ownership    int
+	Bannerimage  string
 	Transmission string
-	ImagePath1   string
-	ImagePath2   string
-	ImagePath3   string
-	ImagePath4   string
-	ImagePath5   string
-	ImagePath6   string
-	ImagePath7   string
+	Images       []Image `gorm:"foreignKey:CarID"`
+	RegNo        string
+	Status       string
+	Price        int
+}
 
-	RegNo  string
-	Status string
+type Image struct {
+	ID    uint `gorm:"primaryKey:autoIncrement"`
+	CarID uint `gorm:"index"`
+	Path  string
 }

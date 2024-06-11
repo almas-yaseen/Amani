@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"ginapp/domain"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -12,120 +13,117 @@ import (
 	"gorm.io/gorm"
 )
 
-func Dashboard(db *gorm.DB) gin.HandlerFunc {
+func Get_Specfic_Product(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
+		id := c.Param("id")
+
+		productID, err := strconv.Atoi(id)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to retrieve the id"})
+			return
+		}
+		var car domain.Car
+		if err := db.Preload("Images").First(&car, productID).Error; err != nil {
+			c.JSON(http.StatusOK, gin.H{"error": "product not found"})
+			return
+
+		}
+
+		c.JSON(http.StatusOK, gin.H{"product": car, "status": "success"})
+
+	}
+
+}
+
+func Dashboard(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
 		var cars []domain.Car
 
 		if err := db.Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch the database"})
 			return
-
-		}
-		c.HTML(http.StatusOK, "admin.html", gin.H{"Cars": cars})
-
-	}
-
-}
-
-func DeleteCar(db *gorm.DB) gin.HandlerFunc {
-
-	return func(c *gin.Context) {
-
-		id := c.Param("id")
-		fmt.Println("here is the id", id)
-		carID, err := strconv.Atoi(id)
-		if err != nil {
-			c.String(http.StatusBadRequest, "Invalid id")
-			return
-		}
-		if err := db.Where("id=?", carID).Delete(&domain.Car{}).Error; err != nil {
-			c.String(http.StatusInternalServerError, "failed to delete the database")
-			return
-
-		}
-		c.Redirect(http.StatusSeeOther, "/admin")
-
-	}
-
-}
-func EditCar(db *gorm.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-
-		id := c.Param("id")
-
-		var car domain.Car
-
-		if err := db.First(&car, id).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "car not found"})
-			return
-
-		}
-		car.Brand = c.PostForm("brand")
-		car.Model = c.PostForm("model")
-		car.Year = c.PostForm("year")
-		car.Color = c.PostForm("color")
-		car.Variant = c.PostForm("variant")
-		car.Kms, _ = strconv.Atoi(c.PostForm("kms"))
-		car.Ownership, _ = strconv.Atoi(c.PostForm("ownership"))
-		car.Transmission = c.PostForm("transmission")
-		car.RegNo = c.PostForm("regno")
-		car.Status = c.PostForm("status")
-
-		form, err := c.MultipartForm()
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to get the form"})
-			return
-		}
-		files := form.File["images[]"]
-		fmt.Println("here is the files", files)
-
-		imagePaths := map[int]string{
-
-			0: car.ImagePath1,
-			1: car.ImagePath2,
-			2: car.ImagePath3,
-			3: car.ImagePath4,
-			4: car.ImagePath5,
-			5: car.ImagePath6,
-			6: car.ImagePath7,
 		}
 
-		for i, file := range files {
-			if file != nil {
-				filename := filepath.Base(file.Filename)
-				uploadPath := filepath.Join("uploads", filename)
-				if err := c.SaveUploadedFile(file, uploadPath); err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save the image"})
-					return
-				}
-				imagePaths[i] = "/" + strings.ReplaceAll(uploadPath, "\\", "/")
-
+		// Fetch associated images for each car
+		for i, car := range cars {
+			fmt.Println("here is the i cand car", i, car)
+			var images []domain.Image
+			if err := db.Where("car_id = ?", car.ID).Find(&images).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch images"})
+				return
 			}
+			cars[i].Images = images
 
 		}
-		car.ImagePath1 = imagePaths[0]
-		car.ImagePath2 = imagePaths[1]
-		car.ImagePath3 = imagePaths[2]
-		car.ImagePath4 = imagePaths[3]
-		car.ImagePath5 = imagePaths[4]
-		car.ImagePath6 = imagePaths[5]
-		car.ImagePath7 = imagePaths[6]
 
-		if err := db.Save(&car).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to upload the car"})
+		// Now, fetch all images for all cars
+		var allImages []domain.Image
+		if err := db.Find(&allImages).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch all images"})
 			return
 		}
-		c.Redirect(http.StatusSeeOther, "/admin")
+
+		// Pass both cars and images to the HTML template
+		c.HTML(http.StatusOK, "admin.html", gin.H{"Cars": cars, "Images": allImages})
+	}
+}
+func Get_Banner_Images(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var cars []domain.Car
+
+		if err := db.Find(&cars).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch the banner images"})
+			return
+		}
+		var bannerImages []string
+		for _, car := range cars {
+			bannerImages = append(bannerImages, car.Bannerimage)
+			fmt.Println("here is the banner images", bannerImages)
+		}
+		c.JSON(http.StatusOK, gin.H{"status": "success", "bannerImages": bannerImages})
+
 	}
 
 }
 
+func GetAllVehicles(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var cars []domain.Car
+
+		if err := db.Preload("Images", func(db *gorm.DB) *gorm.DB {
+			return db.Limit(1)
+		}).Find(&cars).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch the images"})
+			return
+		}
+
+		// Create a new structure to hold car with a single image
+		type CarWithImage struct {
+			domain.Car
+			Image domain.Image
+		}
+
+		var result []CarWithImage
+
+		// Populate the new structure
+		for _, car := range cars {
+			var image domain.Image
+			if len(car.Images) > 0 {
+				image = car.Images[0]
+			}
+			result = append(result, CarWithImage{Car: car, Image: image})
+		}
+
+		c.JSON(http.StatusOK, gin.H{"vehicles": result, "status": "success"})
+	}
+}
 func AddCar(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var car domain.Car
+		fmt.Println("Starting to process the AddCar request")
 
-		// Retrieve form data
 		car.Brand = c.PostForm("brand")
 		car.Model = c.PostForm("model")
 		car.Year = c.PostForm("year")
@@ -136,49 +134,190 @@ func AddCar(db *gorm.DB) gin.HandlerFunc {
 		car.Transmission = c.PostForm("transmission")
 		car.RegNo = c.PostForm("regno")
 		car.Status = c.PostForm("status")
+		car.Price, _ = strconv.Atoi(c.PostForm("price"))
 
-		// Retrieve multiple files from the request
-		form, err := c.MultipartForm()
+		form, err := c.MultipartForm() // allows files to be uploaded along with other form fields
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to get the form"})
 			return
 		}
-		files := form.File["images[]"]
 
-		// Ensure exactly 7 images are uploaded
-		if len(files) != 7 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "exactly 7 images are required"})
+		bannerImage, err := c.FormFile("bannerimage")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to get the bannerimage"})
 			return
 		}
 
-		// Save each file and create image paths
-		imagePaths := make([]string, 7)
-		for i, file := range files {
+		// Create the full path for the banner image
+		bannerImagePath := filepath.Join("uploads", bannerImage.Filename)
+		if err := c.SaveUploadedFile(bannerImage, bannerImagePath); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save the image"})
+			return
+		}
+		// Replace backslashes with forward slashes
+		bannerImagePath = "/" + strings.ReplaceAll(bannerImagePath, "\\", "/")
+		car.Bannerimage = bannerImagePath
+
+		files := form.File["images[]"]
+		var images []domain.Image
+
+		for _, file := range files {
 			filename := filepath.Base(file.Filename)
 			uploadPath := filepath.Join("uploads", filename)
 			if err := c.SaveUploadedFile(file, uploadPath); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save the image"})
 				return
 			}
-			imagePaths[i] = "/" + strings.ReplaceAll(uploadPath, "\\", "/")
+			imagePath := "/" + strings.ReplaceAll(uploadPath, "\\", "/")
+			images = append(images, domain.Image{Path: imagePath})
+			fmt.Println("here is the second lastone", images)
 		}
+		car.Images = images
 
-		// Set the image paths in the Car struct
-		car.ImagePath1 = imagePaths[0]
-		car.ImagePath2 = imagePaths[1]
-		car.ImagePath3 = imagePaths[2]
-		car.ImagePath4 = imagePaths[3]
-		car.ImagePath5 = imagePaths[4]
-		car.ImagePath6 = imagePaths[5]
-		car.ImagePath7 = imagePaths[6]
-
-		// Save the car to the database
+		fmt.Println("here is the updated one", car.Images)
 		if err := db.Create(&car).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to add the car to the database"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to add the car"})
 			return
 		}
 
-		// Redirect to the listing page
+		c.Redirect(http.StatusSeeOther, "/admin")
+	}
+}
+func EditCar(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		var car domain.Car
+
+		// Fetch the existing car
+		if err := db.Preload("Images").First(&car, id).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Car not found"})
+			return
+		}
+
+		// Update car details from the form
+		car.Brand = c.PostForm("brand")
+		car.Model = c.PostForm("model")
+		car.Year = c.PostForm("year")
+		car.Color = c.PostForm("color")
+		car.Variant = c.PostForm("variant")
+		car.Kms, _ = strconv.Atoi(c.PostForm("kms"))
+		car.Ownership, _ = strconv.Atoi(c.PostForm("ownership"))
+		car.Transmission = c.PostForm("transmission")
+		car.RegNo = c.PostForm("regno")
+		car.Status = c.PostForm("status")
+		car.Price, _ = strconv.Atoi(c.PostForm("price"))
+
+		form, err := c.MultipartForm()
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to get the form"})
+			return
+		}
+
+		bannerImage, err := c.FormFile("bannerimage")
+		if err == nil {
+			// Upload new banner image
+			bannerImagePath := filepath.Join("uploads", bannerImage.Filename)
+			if err := c.SaveUploadedFile(bannerImage, bannerImagePath); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save the banner image"})
+				return
+			}
+			bannerImagePath = "/" + strings.ReplaceAll(bannerImagePath, "\\", "/")
+			car.Bannerimage = bannerImagePath
+		}
+
+		// Handle the images update
+		files := form.File["images[]"]
+		var images []domain.Image
+
+		for _, file := range files {
+			filename := filepath.Base(file.Filename)
+			uploadPath := filepath.Join("uploads", filename)
+			if err := c.SaveUploadedFile(file, uploadPath); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save the image"})
+				return
+			}
+			imagePath := "/" + strings.ReplaceAll(uploadPath, "\\", "/")
+			images = append(images, domain.Image{Path: imagePath})
+		}
+
+		// Update the car's images if new images are uploaded
+		if len(images) > 0 {
+			// Delete existing images
+			if err := db.Where("car_id = ?", car.ID).Delete(&domain.Image{}).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete existing images"})
+				return
+			}
+			// Save new images
+			car.Images = images
+		}
+
+		// Save the updated car details
+		if err := db.Save(&car).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update the car"})
+			return
+		}
+
+		// Redirect to the admin page
+		c.Redirect(http.StatusSeeOther, "/admin")
+	}
+}
+
+// Handle the banner image update
+
+func DeleteCar(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		carID, err := strconv.Atoi(id)
+		if err != nil {
+			c.String(http.StatusBadRequest, "Invalid car ID")
+			return
+		}
+
+		var car domain.Car
+		if err := db.First(&car, carID).Error; err != nil {
+			c.String(http.StatusInternalServerError, "failed to fetch the car details")
+			return
+		}
+
+		if err := os.Remove(car.Bannerimage); err != nil {
+			fmt.Println("failed to delete the banner image file", err)
+		}
+
+		// Fetch images to delete their corresponding files
+		var images []domain.Image
+		if err := db.Where("car_id = ?", carID).Find(&images).Error; err != nil {
+			c.String(http.StatusInternalServerError, "Failed to fetch car images")
+			return
+		}
+
+		// Delete images from the static folder
+		for _, image := range images {
+			// Extract the relative path of the image within the uploads folder
+			relativeImagePath := strings.TrimPrefix(image.Path, "/uploads/")
+
+			// Construct the absolute path of the image file
+			imagePath := filepath.Join("uploads", relativeImagePath)
+
+			// Delete the image file
+			if err := os.Remove(imagePath); err != nil {
+				// Handle error if deletion fails
+				fmt.Println("Failed to delete image file:", err)
+			}
+		}
+
+		// Delete the images from the database
+		if err := db.Where("car_id = ?", carID).Delete(&domain.Image{}).Error; err != nil {
+			c.String(http.StatusInternalServerError, "Failed to delete car images")
+			return
+		}
+
+		// Delete the car
+		if err := db.Where("id = ?", carID).Delete(&domain.Car{}).Error; err != nil {
+			c.String(http.StatusInternalServerError, "Failed to delete car")
+			return
+		}
+
+		// Redirect to admin page
 		c.Redirect(http.StatusSeeOther, "/admin")
 	}
 }

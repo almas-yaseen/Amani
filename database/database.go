@@ -13,7 +13,7 @@ var DB *gorm.DB
 
 func ConnectDatabase(cfg config.Config) (*gorm.DB, error) {
 
-	psqlInfo := fmt.Sprintf("host=localhost user=%s dbname=%s  port=%s password=%s", cfg.DBUser, cfg.DBName, cfg.DBPort, cfg.DBPassword)
+	psqlInfo := fmt.Sprintf("host=db user=%s dbname=%s  port=%s password=%s sslmode=disable TimeZone=Asia/Shanghai", cfg.DBUser, cfg.DBName, cfg.DBPort, cfg.DBPassword)
 
 	db, dberr := gorm.Open(postgres.Open(psqlInfo), &gorm.Config{})
 
@@ -23,7 +23,7 @@ func ConnectDatabase(cfg config.Config) (*gorm.DB, error) {
 	DB = db
 
 	DB.AutoMigrate(&domain.Car{})
-
+	DB.AutoMigrate(&domain.Image{})
 	return DB, nil
 
 }
