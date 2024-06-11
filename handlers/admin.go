@@ -7,34 +7,78 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jung-kurt/gofpdf"
 	"gorm.io/gorm"
 )
 
-func Get_Specfic_Product(db *gorm.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
+func Get_Pdf_Report(c *gin.Context) {
+	db := c.MustGet("db").(*gorm.DB) // Get the database instance from the context
 
-		id := c.Param("id")
-
-		productID, err := strconv.Atoi(id)
-
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to retrieve the id"})
-			return
-		}
-		var car domain.Car
-		if err := db.Preload("Images").First(&car, productID).Error; err != nil {
-			c.JSON(http.StatusOK, gin.H{"error": "product not found"})
-			return
-
-		}
-
-		c.JSON(http.StatusOK, gin.H{"product": car, "status": "success"})
-
+	// Query all cars with their images
+	var cars []domain.Car
+	if err := db.Preload("Images").Find(&cars).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
+	// Create a new PDF
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+
+	// Set font
+	pdf.SetFont("Arial", "B", 12)
+
+	// Write header
+	pdf.Cell(190, 10, "Cars Report")
+	pdf.Ln(12)
+
+	// Write data to PDF
+	for _, car := range cars {
+		pdf.SetFont("Arial", "B", 10)
+		pdf.Cell(190, 10, fmt.Sprintf("Brand: %s, Model: %s", car.Brand, car.Model))
+		pdf.Ln(8)
+
+		pdf.SetFont("Arial", "", 10)
+		pdf.CellFormat(190, 10, fmt.Sprintf("Year: %s", car.Year), "", 0, "L", false, 0, "")
+		pdf.Ln(8)
+		pdf.CellFormat(190, 10, fmt.Sprintf("Color: %s", car.Color), "", 0, "L", false, 0, "")
+		pdf.Ln(8)
+		pdf.CellFormat(190, 10, fmt.Sprintf("Variant: %s", car.Variant), "", 0, "L", false, 0, "")
+		pdf.Ln(8)
+		pdf.CellFormat(190, 10, fmt.Sprintf("Kms: %d", car.Kms), "", 0, "L", false, 0, "")
+		pdf.Ln(8)
+		pdf.CellFormat(190, 10, fmt.Sprintf("Ownership: %d", car.Ownership), "", 0, "L", false, 0, "")
+		pdf.Ln(8)
+		pdf.CellFormat(190, 10, fmt.Sprintf("Transmission: %s", car.Transmission), "", 0, "L", false, 0, "")
+		pdf.Ln(8)
+		pdf.CellFormat(190, 10, fmt.Sprintf("Reg No: %s", car.RegNo), "", 0, "L", false, 0, "")
+		pdf.Ln(8)
+		pdf.CellFormat(190, 10, fmt.Sprintf("Status: %s", car.Status), "", 0, "L", false, 0, "")
+		pdf.Ln(8)
+		pdf.CellFormat(190, 10, fmt.Sprintf("Price: %d", car.Price), "", 0, "L", false, 0, "")
+		pdf.Ln(8)
+		pdf.CellFormat(190, 10, fmt.Sprintf("Banner Image: %s", car.Bannerimage), "", 0, "L", false, 0, "")
+		pdf.Ln(8)
+
+		pdf.SetFont("Arial", "B", 10)
+		pdf.Cell(190, 10, "Images")
+		pdf.Ln(8)
+		pdf.SetFont("Arial", "", 10)
+		for _, image := range car.Images {
+			pdf.CellFormat(190, 10, fmt.Sprintf("Image Path: %s", image.Path), "", 0, "L", false, 0, "")
+			pdf.Ln(8)
+		}
+
+		pdf.Ln(10)
+	}
+
+	// Serve the PDF file
+	c.Header("Content-Type", "application/pdf")
+	pdf.Output(c.Writer)
 }
 
 func Dashboard(db *gorm.DB) gin.HandlerFunc {
