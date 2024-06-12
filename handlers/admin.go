@@ -115,6 +115,12 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 }
 func Get_Banner_Images(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Set CORS headers
+		c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
+		c.Header("Access-Control-Allow-Credentials", "true")
+
 		var cars []domain.Car
 
 		if err := db.Find(&cars).Error; err != nil {
@@ -127,13 +133,17 @@ func Get_Banner_Images(db *gorm.DB) gin.HandlerFunc {
 			fmt.Println("here is the banner images", bannerImages)
 		}
 		c.JSON(http.StatusOK, gin.H{"status": "success", "bannerImages": bannerImages})
-
 	}
-
 }
 
 func GetAllVehicles(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Set CORS headers
+		c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
+		c.Header("Access-Control-Allow-Credentials", "true")
+
 		var cars []domain.Car
 
 		if err := db.Preload("Images", func(db *gorm.DB) *gorm.DB {

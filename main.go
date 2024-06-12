@@ -29,7 +29,7 @@ func main() {
 
 	// Custom CORS configuration
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"}, // Allow your React frontend
+		AllowOrigins:     []string{"http://localhost:5173"}, // Allow your React frontend
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,
@@ -38,16 +38,12 @@ func main() {
 	router.Use(cors.New(corsConfig))
 
 	router.LoadHTMLGlob("templates/*")
-
 	router.Static("/static", "./static")
-
-	// Serve the uploads directory
 	router.Static("/uploads", "./uploads")
 
 	routes.AdminRoutes(router.Group(""), db)
 
 	err = router.Run("localhost:8080")
-
 	if err != nil {
 		log.Fatalf("localhost error  %v", err)
 	}
