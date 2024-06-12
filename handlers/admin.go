@@ -113,7 +113,7 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 		c.HTML(http.StatusOK, "admin.html", gin.H{"Cars": cars, "Images": allImages})
 	}
 }
-func Get_Banner_Images(db *gorm.DB) gin.HandlerFunc {
+func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Set CORS headers
 		c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
@@ -123,16 +123,36 @@ func Get_Banner_Images(db *gorm.DB) gin.HandlerFunc {
 
 		var cars []domain.Car
 
-		if err := db.Find(&cars).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch the banner images"})
+		if err := db.Order("id desc").Limit(5).Find(&cars).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch tha database"})
 			return
+
 		}
-		var bannerImages []string
+
+		// Create a structure to hold the response data
+		type CarDetail struct {
+			BannerImage string `json:"bannerImage"`
+			Model       string `json:"model"`
+			Variant     string `json:"variant"`
+			Price       int    `json:"price"`
+			Color       string `json:"color"`
+		}
+
+		var carDetails []CarDetail
+
 		for _, car := range cars {
-			bannerImages = append(bannerImages, car.Bannerimage)
-			fmt.Println("here is the banner images", bannerImages)
+			carDetail := CarDetail{
+				BannerImage: car.Bannerimage,
+				Model:       car.Model,
+				Variant:     car.Variant,
+				Price:       car.Price,
+				Color:       car.Color,
+			}
+			carDetails = append(carDetails, carDetail)
+			fmt.Println("Car details:", carDetail)
 		}
-		c.JSON(http.StatusOK, gin.H{"status": "success", "bannerImages": bannerImages})
+
+		c.JSON(http.StatusOK, gin.H{"status": "success", "carDetails": carDetails})
 	}
 }
 

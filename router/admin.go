@@ -10,7 +10,7 @@ import (
 func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 
 	r.GET("/admin", handlers.Dashboard(db))
-	r.GET("/myapp/get_banner_images", handlers.Get_Banner_Images(db))
+	r.GET("/myapp/get_banner_images", handlers.Get_Banner_Vehicles(db))
 	r.GET("/myapp/get_all_vehicles", handlers.GetAllVehicles(db))
 
 	admin := r.Group("/admin")
