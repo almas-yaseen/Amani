@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"strings"
 
@@ -15,73 +16,72 @@ import (
 	"gorm.io/gorm"
 )
 
-func Get_Pdf_Report(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB) // Get the database instance from the context
-
-	// Query all cars with their images
-	var cars []domain.Car
-	if err := db.Preload("Images").Find(&cars).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Create a new PDF
-	pdf := gofpdf.New("P", "mm", "A4", "")
-	pdf.AddPage()
-
-	// Set font
-	pdf.SetFont("Arial", "B", 12)
-
-	// Write header
-	pdf.Cell(190, 10, "Cars Report")
-	pdf.Ln(12)
-
-	// Write data to PDF
-	for _, car := range cars {
-		pdf.SetFont("Arial", "B", 10)
-		pdf.Cell(190, 10, fmt.Sprintf("Brand: %s, Model: %s", car.Brand, car.Model))
-		pdf.Ln(8)
-
-		pdf.SetFont("Arial", "", 10)
-		pdf.CellFormat(190, 10, fmt.Sprintf("Year: %s", car.Year), "", 0, "L", false, 0, "")
-		pdf.Ln(8)
-		pdf.CellFormat(190, 10, fmt.Sprintf("Color: %s", car.Color), "", 0, "L", false, 0, "")
-		pdf.Ln(8)
-		pdf.CellFormat(190, 10, fmt.Sprintf("Variant: %s", car.Variant), "", 0, "L", false, 0, "")
-		pdf.Ln(8)
-		pdf.CellFormat(190, 10, fmt.Sprintf("Kms: %d", car.Kms), "", 0, "L", false, 0, "")
-		pdf.Ln(8)
-		pdf.CellFormat(190, 10, fmt.Sprintf("Ownership: %d", car.Ownership), "", 0, "L", false, 0, "")
-		pdf.Ln(8)
-		pdf.CellFormat(190, 10, fmt.Sprintf("Transmission: %s", car.Transmission), "", 0, "L", false, 0, "")
-		pdf.Ln(8)
-		pdf.CellFormat(190, 10, fmt.Sprintf("Reg No: %s", car.RegNo), "", 0, "L", false, 0, "")
-		pdf.Ln(8)
-		pdf.CellFormat(190, 10, fmt.Sprintf("Status: %s", car.Status), "", 0, "L", false, 0, "")
-		pdf.Ln(8)
-		pdf.CellFormat(190, 10, fmt.Sprintf("Price: %d", car.Price), "", 0, "L", false, 0, "")
-		pdf.Ln(8)
-		pdf.CellFormat(190, 10, fmt.Sprintf("Banner Image: %s", car.Bannerimage), "", 0, "L", false, 0, "")
-		pdf.Ln(8)
-
-		pdf.SetFont("Arial", "B", 10)
-		pdf.Cell(190, 10, "Images")
-		pdf.Ln(8)
-		pdf.SetFont("Arial", "", 10)
-		for _, image := range car.Images {
-			pdf.CellFormat(190, 10, fmt.Sprintf("Image Path: %s", image.Path), "", 0, "L", false, 0, "")
-			pdf.Ln(8)
+func Get_Pdf_Report(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Query all cars with their images
+		var cars []domain.Car
+		if err := db.Preload("Images").Find(&cars).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 
-		pdf.Ln(10)
-	}
+		// Create a new PDF
+		pdf := gofpdf.New("P", "mm", "A4", "")
+		pdf.AddPage()
 
-	// Serve the PDF file
-	c.Header("Content-Type", "application/pdf")
-	pdf.Output(c.Writer)
+		// Set font
+		pdf.SetFont("Arial", "B", 12)
+
+		// Write header
+		pdf.Cell(190, 10, "Cars Report")
+		pdf.Ln(12)
+
+		// Write data to PDF
+		for _, car := range cars {
+			pdf.SetFont("Arial", "B", 10)
+			pdf.Cell(190, 10, fmt.Sprintf("Brand: %s, Model: %s", car.Brand, car.Model))
+			pdf.Ln(8)
+
+			pdf.SetFont("Arial", "", 10)
+			pdf.CellFormat(190, 10, fmt.Sprintf("Year: %s", car.Year), "", 0, "L", false, 0, "")
+			pdf.Ln(8)
+			pdf.CellFormat(190, 10, fmt.Sprintf("Color: %s", car.Color), "", 0, "L", false, 0, "")
+			pdf.Ln(8)
+			pdf.CellFormat(190, 10, fmt.Sprintf("Variant: %s", car.Variant), "", 0, "L", false, 0, "")
+			pdf.Ln(8)
+			pdf.CellFormat(190, 10, fmt.Sprintf("Kms: %d", car.Kms), "", 0, "L", false, 0, "")
+			pdf.Ln(8)
+			pdf.CellFormat(190, 10, fmt.Sprintf("Ownership: %d", car.Ownership), "", 0, "L", false, 0, "")
+			pdf.Ln(8)
+			pdf.CellFormat(190, 10, fmt.Sprintf("Transmission: %s", car.Transmission), "", 0, "L", false, 0, "")
+			pdf.Ln(8)
+			pdf.CellFormat(190, 10, fmt.Sprintf("Reg No: %s", car.RegNo), "", 0, "L", false, 0, "")
+			pdf.Ln(8)
+			pdf.CellFormat(190, 10, fmt.Sprintf("Status: %s", car.Status), "", 0, "L", false, 0, "")
+			pdf.Ln(8)
+			pdf.CellFormat(190, 10, fmt.Sprintf("Price: %d", car.Price), "", 0, "L", false, 0, "")
+			pdf.Ln(8)
+
+			pdf.Ln(8)
+
+			pdf.SetFont("Arial", "B", 10)
+
+			pdf.Ln(8)
+			pdf.SetFont("Arial", "", 10)
+
+			pdf.Ln(10)
+		}
+
+		// Serve the PDF file
+		c.Header("Content-Type", "application/pdf")
+		pdf.Output(c.Writer)
+	}
 }
 
+// Register the route
+
 func Dashboard(db *gorm.DB) gin.HandlerFunc {
+	fmt.Println("here is the dashboard")
 	return func(c *gin.Context) {
 		var cars []domain.Car
 
@@ -193,7 +193,7 @@ func AddCar(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		// Create the full path for the banner image
-		bannerImagePath := filepath.Join("uploads", bannerImage.Filename)
+		bannerImagePath := filepath.Join("uploads", fmt.Sprintf("%d_%s", car.ID, bannerImage.Filename))
 		if err := c.SaveUploadedFile(bannerImage, bannerImagePath); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save the image"})
 			return
@@ -206,7 +206,7 @@ func AddCar(db *gorm.DB) gin.HandlerFunc {
 		var images []domain.Image
 
 		for _, file := range files {
-			filename := filepath.Base(file.Filename)
+			filename := filepath.Base(fmt.Sprintf("%d_%d_%s", car.ID, time.Now().UnixNano(), file.Filename)) // Using current time to ensure unique filename
 			uploadPath := filepath.Join("uploads", filename)
 			if err := c.SaveUploadedFile(file, uploadPath); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save the image"})
@@ -307,7 +307,6 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 }
 
 // Handle the banner image update
-
 func DeleteCar(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
@@ -319,12 +318,13 @@ func DeleteCar(db *gorm.DB) gin.HandlerFunc {
 
 		var car domain.Car
 		if err := db.First(&car, carID).Error; err != nil {
-			c.String(http.StatusInternalServerError, "failed to fetch the car details")
+			c.String(http.StatusInternalServerError, "Failed to fetch the car details")
 			return
 		}
 
-		if err := os.Remove(car.Bannerimage); err != nil {
-			fmt.Println("failed to delete the banner image file", err)
+		// Delete the banner image
+		if err := deleteFile(car.Bannerimage); err != nil {
+			fmt.Println("Failed to delete the banner image file:", err)
 		}
 
 		// Fetch images to delete their corresponding files
@@ -343,8 +343,7 @@ func DeleteCar(db *gorm.DB) gin.HandlerFunc {
 			imagePath := filepath.Join("uploads", relativeImagePath)
 
 			// Delete the image file
-			if err := os.Remove(imagePath); err != nil {
-				// Handle error if deletion fails
+			if err := deleteFile(imagePath); err != nil {
 				fmt.Println("Failed to delete image file:", err)
 			}
 		}
@@ -355,7 +354,7 @@ func DeleteCar(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Delete the car
+		// Delete the car from the database
 		if err := db.Where("id = ?", carID).Delete(&domain.Car{}).Error; err != nil {
 			c.String(http.StatusInternalServerError, "Failed to delete car")
 			return
@@ -364,4 +363,20 @@ func DeleteCar(db *gorm.DB) gin.HandlerFunc {
 		// Redirect to admin page
 		c.Redirect(http.StatusSeeOther, "/admin")
 	}
+}
+
+func deleteFile(filePath string) error {
+	if filePath == "" {
+		return fmt.Errorf("file path is empty")
+	}
+
+	err := os.Remove(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("file does not exist: %s", filePath)
+		}
+		return err
+	}
+
+	return nil
 }

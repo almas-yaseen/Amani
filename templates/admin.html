@@ -242,10 +242,9 @@
                         <td> <img src="{{.Bannerimage}}" alt="jack" class="square-image" style="width: 50px; height: auto;"></td>
                         <td>
                             <div class="image-field">
-                                {{range .Images}}
-                                <img src="{{ .Path}}" alt="" class="square-image" style="width: 50px; height: auto;">
-
-                                {{end}}
+                                {{with index .Images 0}}
+                <img src="{{.Path}}" alt="Car Image" class="square-image" style="width: 50px; height: auto;">
+                {{end}}
                             </div>
                         </td>
         </div>
@@ -549,15 +548,13 @@
                 }
             }
         });
-
-
-    </script>
-    <script>
+    
+        // Event listener to handle PDF generation button click
         document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("generateReportButton").addEventListener("click", function() {
                 // Send a request to fetch the PDF file
                 fetch("/admin/cars/pdf_report")
-                    .then(response => response.bl ob())
+                    .then(response => response.blob())
                     .then(blob => {
                         // Create a URL for the blob
                         const url = window.URL.createObjectURL(blob);
