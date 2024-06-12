@@ -16,6 +16,44 @@ import (
 	"gorm.io/gorm"
 )
 
+func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Set CORS headers
+		c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
+		c.Header("Access-Control-Allow-Credentials", "true")
+
+		var cars []domain.Car
+
+		if err := db.Preload("Images", func(db *gorm.DB) *gorm.DB {
+			return db.Limit(1)
+		}).Find(&cars).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch the images"})
+			return
+		}
+
+		// Create a new structure to hold car with a single image
+		type CarWithImage struct {
+			domain.Car
+			Image domain.Image
+		}
+
+		var result []CarWithImage
+
+		// Populate the new structure
+		for _, car := range cars {
+			var image domain.Image
+			if len(car.Images) > 0 {
+				image = car.Images[0]
+			}
+			result = append(result, CarWithImage{Car: car, Image: image})
+		}
+
+		c.JSON(http.StatusOK, gin.H{"vehicles": result, "status": "success"})
+	}
+}
+
 func Get_Pdf_Report(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Query all cars with their images
@@ -166,7 +204,7 @@ func GetAllVehicles(db *gorm.DB) gin.HandlerFunc {
 
 		var cars []domain.Car
 
-		if err := db.Preload("Images", func(db *gorm.DB) *gorm.DB {
+		if err := db.Order("id desc").Limit(6).Preload("Images", func(db *gorm.DB) *gorm.DB {
 			return db.Limit(1)
 		}).Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch the images"})
@@ -409,4 +447,29 @@ func deleteFile(filePath string) error {
 	}
 
 	return nil
+}
+
+func Get_Specific_Vehicle(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Get the vehicle ID from the URL parameters
+		id := c.Param("id")
+
+		// Convert the ID string to an integer
+		vehicleID, err := strconv.Atoi(id)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid vehicle ID"})
+			return
+		}
+
+		// Fetch the specific vehicle from the database
+		var vehicle domain.Car
+		if err := db.Preload("Images").First(&vehicle, vehicleID).Error; err != nil {
+			fmt.Println("here is the &vechilce")
+			c.JSON(http.StatusNotFound, gin.H{"error": "Vehicle not found"})
+			return
+		}
+
+		// Return the vehicle details as JSON
+		c.JSON(http.StatusOK, gin.H{"vehicle": vehicle})
+	}
 }
