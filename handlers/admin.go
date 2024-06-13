@@ -36,32 +36,53 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 
 		var cars []domain.Car
 
-		if err := db.Preload("Images", func(db *gorm.DB) *gorm.DB {
-			return db.Limit(1)
-		}).Find(&cars).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch the images"})
+		if err := db.Order("id desc").Preload("Images").Find(&cars).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch the cars"})
 			return
 		}
 
 		// Create a new structure to hold car with a single image
 		type CarWithImage struct {
-			domain.Car
-			Image domain.Image
+			ID           uint   `json:"id"`
+			Brand        string `json:"brand"`
+			Model        string `json:"model"`
+			Year         int    `json:"year"`
+			Color        string `json:"color"`
+			Variant      string `json:"variant"`
+			Kms          int    `json:"kms"`
+			Ownership    int    `json:"ownership"`
+			Transmission string `json:"transmission"`
+			Price        int    `json:"price"`
+			Image        string `json:"image"`
 		}
 
 		var result []CarWithImage
 
 		// Populate the new structure
 		for _, car := range cars {
-			var image domain.Image
+			var image string
 			if len(car.Images) > 0 {
-				image = car.Images[0]
+				image = car.Images[0].Path // Select the first image path as the representative image
 			}
-			result = append(result, CarWithImage{Car: car, Image: image})
+			carWithImage := CarWithImage{
+				ID:        car.ID,
+				Brand:     car.Brand,
+				Model:     car.Model,
+				Year:      car.Year,
+				Color:     car.Color,
+				Variant:   car.Variant,
+				Kms:       car.Kms,
+				Ownership: car.Ownership,
 
+				Transmission: car.Transmission,
+
+				Price: car.Price,
+				Image: image,
+			}
+			result = append(result, carWithImage)
 		}
 
-		c.JSON(http.StatusOK, gin.H{"vehicles": result, "status": "success"})
+		c.JSON(http.StatusOK, gin.H{"status": "success", "vehicles": result})
 	}
 }
 
