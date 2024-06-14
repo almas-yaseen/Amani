@@ -238,6 +238,9 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 
 		// Create a structure to hold the response data
 		type CarDetail struct {
+			ID          uint   `json:"id"`
+			Brand       string `json:"brand"`
+			Year        int    `json:"year"`
 			BannerImage string `json:"bannerImage"`
 			Model       string `json:"model"`
 			Variant     string `json:"variant"`
@@ -249,6 +252,9 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 
 		for _, car := range cars {
 			carDetail := CarDetail{
+				ID:          car.ID,
+				Year:        car.Year,
+				Brand:       car.Brand,
 				BannerImage: car.Bannerimage,
 				Model:       car.Model,
 				Variant:     car.Variant,
@@ -350,16 +356,19 @@ func AddCar(db *gorm.DB) gin.HandlerFunc {
 		car.CarType = c.PostForm("car_type")
 		fmt.Println("here is the car type", car.CarType)
 		car.FuelType = c.PostForm("fuel_type")
-		fmt.Println("here is the fuel type", car.FuelType)
+		car.Year_of_manufacturing = c.PostForm("year_of_manufacturing") //new
 
+		fmt.Println("here is the manu", car.Year_of_manufacturing)
+		car.Engine_size = c.PostForm("engine_size")       //new
+		car.Insurance_date = c.PostForm("insurance_date") //new
+		car.Location = c.PostForm("location")             //new
+		fmt.Println("here is the fuel type", car.FuelType)
 		form, err := c.MultipartForm() // allows files to be uploaded along with other form fields
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to get the form"})
 			return
 		}
-
 		bannerImage, err := c.FormFile("bannerimage")
-
 		// Create the full path for the banner image
 		bannerImagePath := filepath.Join("uploads", fmt.Sprintf("%d_%s", car.ID, bannerImage.Filename))
 		fmt.Println("here is the banner image path come on let asscd", bannerImagePath)
@@ -416,6 +425,12 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 		car.Year = year
+		car.CarType = c.PostForm("car_type")
+		car.FuelType = c.PostForm("fuel_type")
+		car.Year_of_manufacturing = c.PostForm("year_of_manufacturing") //new
+		car.Engine_size = c.PostForm("engine_size")                     //new
+		car.Insurance_date = c.PostForm("insurance_date")               //new
+		car.Location = c.PostForm("location")
 		car.Color = c.PostForm("color")
 		car.Variant = c.PostForm("variant")
 		car.Kms, _ = strconv.Atoi(c.PostForm("kms"))

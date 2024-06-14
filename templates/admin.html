@@ -169,28 +169,23 @@
                     </div>
                     <br>
                     <br>
-
-                    <!-- Content Row -->
-                   
-
-                    <!-- Content Row -->
-
-                   
-                        <!-- Pie Chart -->
-                      
-
-                    <!-- Content Row -->
-                    <div class="row">
-                    
-
-<div class="container-xl">
-	<div class="table-responsive">
+                    <div class="row ">
+        <div class="container-xl">
+	          <div class="table-responsive">
 		<div class="table-wrapper">
             <div class="table-title">
                 <div class="row">
                     <div class="col-sm-6">
 						<h2>Manage <b>Cars</b></h2>
+                        
 					</div>
+					
+                </div>
+                <div class="row pt-2">
+                    
+
+
+                   
 					<div class="col-sm-6">
 						<a href="#addCarModal" class="btn btn-success" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Add New Car</span></a>
 											
@@ -216,6 +211,10 @@
                         <th>Image</th>    
                             <th>RegNo</th>
                             <th>Status</th>
+                            <th>Engine size</th>
+                            <th>ManuFacturing Year</th>
+                            <th>Insurance date</th>
+                            <th>Location</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -241,11 +240,14 @@
                 {{end}}
                             </div>
                         </td>
-        </div>
-                           
+                        </div>
                         </td>
                         <td>{{.RegNo}}</td>
                         <td>{{.Status}}</td>
+                        <td>{{.Engine_size}}</td>
+                        <td>{{.Year_of_manufacturing}}</td>
+                        <td>{{.Insurance_date}}</td>
+                        <td>{{.Location}}</td>
                         <td>
                             <a href="#editCarModal-{{.ID}}" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
                             <a href="#deleteCarModal-{{.ID}}" class="delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>
@@ -282,13 +284,35 @@
                             <label>Brand</label>
                             <input type="text" name="brand" class="form-control" required>
                         </div>
+
+                        <div class="form-group">
+                            <label>Year of manufacturing</label>
+                            <input type="text" name="year_of_manufacturing" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Engine size</label>
+                            <input type="text" name="engine_size" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Insurance date</label>
+                            <input type="text" name="insurance_date" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" name="location" class="form-control" required>
+                        </div>
+
+
+
+
+
                         <div class="form-group">
                             <label>Model</label>
                             <input type="text" name="model" class="form-control" required>
                         </div>
                         <div class="form-group">
                             <label>Year</label>
-                            <input type="text" name="year" class="form-control" required>
+                            <input type="number" name="year" class="form-control" required>
                         </div>
                         <div class="form-group">
                             <label>Color</label>
@@ -330,6 +354,8 @@
                         <div class="form-group">
                             <label>Banner image</label>
                             <input type="file" name="bannerimage"   accept="image/*" required>
+                            <a href="https://www.remove.bg/upload" target="blank"><p><strong>Click here to remove background<strong></p></a>
+                       
                         </div>
                         <div class="form-group">
                             <label>Images</label>
@@ -372,6 +398,24 @@
                             <label>Brand</label>
                             <input type="text" name="brand" value="{{.Brand}}" class="form-control" required>
                         </div>
+                        
+                        <div class="form-group">
+                            <label>Year of manufacturing</label>
+                            <input type="text" name="year_of_manufacturing" value="{{.Year_of_manufacturing}}" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Engine size</label>
+                            <input type="text" name="engine_size" value="{{.Engine_size}}" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Insurance date</label>
+                            <input type="text" name="insurance_date" value="{{.Insurance_date}}"  class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" name="location" value="{{.Location}}" class="form-control" required>
+                        </div>
+
                         <div class="form-group">
                             <label>Model</label>
                             <input type="text" name="model" value="{{.Model}}" class="form-control" required>
