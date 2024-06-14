@@ -16,6 +16,13 @@ import (
 	"gorm.io/gorm"
 )
 
+func Logout(c *gin.Context) {
+	// Clear the authentication cookie
+	c.SetCookie("authenticated", "", -1, "/", "", false, true)
+	// Redirect to the login page
+	c.Redirect(http.StatusFound, "/admin/login")
+}
+
 func AdminLogin(c *gin.Context) {
 	fmt.Println("akdbkabkhjasbhkjbasdkjhkjhadbhkdsc")
 	if c.Request.Method == http.MethodPost {

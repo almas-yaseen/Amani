@@ -14,7 +14,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		if err != nil || auth != "true" {
 
-			c.Redirect(http.StatusFound, "/adminlogin")
+			c.Redirect(http.StatusFound, "/admin/login")
 			c.Abort()
 			return
 

@@ -188,6 +188,28 @@
                    
 					<div class="col-sm-6">
 						<a href="#addCarModal" class="btn btn-success" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Add New Car</span></a>
+                        <a href="#logoutModal" class="btn btn-danger" data-toggle="modal">
+                            <i class="material-icons">&#xE147;</i> <span>Logout</span>
+                        </a>
+                        
+                        <!-- Logout Modal -->
+                        <div id="logoutModal" class="modal fade">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h4 class="modal-title">Confirm Logout</h4>
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Are you sure you want to logout?</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                        <a href="/admin/logout" class="btn btn-danger">Logout</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 											
 					</div>
                 </div>
