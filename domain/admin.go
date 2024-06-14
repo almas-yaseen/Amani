@@ -46,3 +46,8 @@ type Image struct {
 	CarID uint   `json:"car_id"`
 	Path  string `json:"path"`
 }
+
+type User struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}

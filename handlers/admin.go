@@ -16,6 +16,26 @@ import (
 	"gorm.io/gorm"
 )
 
+func AdminLogin(c *gin.Context) {
+	fmt.Println("akdbkabkhjasbhkjbasdkjhkjhadbhkdsc")
+	if c.Request.Method == http.MethodPost {
+		username := c.PostForm("username")
+		password := c.PostForm("password")
+		fmt.Println("here is the username", username)
+
+		if username == "amani" && password == "amani123" {
+			c.SetCookie("authenticated", "true", 3600, "/", "", false, true)
+			c.Redirect(http.StatusFound, "/admin")
+			return
+
+		}
+		c.HTML(http.StatusUnauthorized, "login.html", gin.H{"error": "Invalid credentials"})
+		return
+	}
+	c.HTML(http.StatusOK, "login.html", nil)
+
+}
+
 func Dashboard(db *gorm.DB) gin.HandlerFunc {
 	fmt.Println("here is the dashboard")
 	return func(c *gin.Context) {
@@ -105,6 +125,13 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Credentials", "true")
 
 		var cars []domain.Car
+		var totalcount int64
+
+		if err := db.Model(&domain.Car{}).Count(&totalcount).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count "})
+			return
+
+		}
 
 		if err := db.Order("id desc").Preload("Images").Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch the cars"})
@@ -131,6 +158,7 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 		// Populate the new structure
 		for _, car := range cars {
 			var image string
+
 			if len(car.Images) > 0 {
 				image = car.Images[0].Path // Select the first image path as the representative image
 			}
@@ -152,7 +180,7 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 			result = append(result, carWithImage)
 		}
 
-		c.JSON(http.StatusOK, gin.H{"status": "success", "vehicles": result})
+		c.JSON(http.StatusOK, gin.H{"status": "success", "vehicles": result, "totalcount": totalcount})
 	}
 }
 
@@ -239,6 +267,7 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 		// Create a structure to hold the response data
 		type CarDetail struct {
 			ID          uint   `json:"id"`
+			Car_type    string `json:"car_type"`
 			Brand       string `json:"brand"`
 			Year        int    `json:"year"`
 			BannerImage string `json:"bannerImage"`
@@ -255,6 +284,7 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 				ID:          car.ID,
 				Year:        car.Year,
 				Brand:       car.Brand,
+				Car_type:    car.CarType,
 				BannerImage: car.Bannerimage,
 				Model:       car.Model,
 				Variant:     car.Variant,
