@@ -18,24 +18,28 @@ const (
 )
 
 type Car struct {
-	ID           uint      `gorm:"primaryKey;autoIncrement" json:"id"`
-	Brand        string    `json:"brand"`
-	Model        string    `json:"model"`
-	Year         int       `json:"year"`
-	Color        string    `json:"color"`
-	CarType      string    `json:"car_type"`
-	FuelType     string    `json:"fuel_type"`
-	Variant      string    `json:"variant"`
-	Kms          int       `json:"kms"`
-	Ownership    int       `json:"ownership"`
-	Bannerimage  string    `json:"bannerimage"`
-	Transmission string    `json:"transmission"`
-	Images       []Image   `gorm:"foreignKey:CarID" json:"images"`
-	RegNo        string    `json:"regno"`
-	Status       string    `json:"status"`
-	Price        int       `json:"price"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID                    uint      `gorm:"primaryKey;autoIncrement" json:"id"`
+	Brand                 string    `json:"brand"`
+	Model                 string    `json:"model"`
+	Year                  int       `json:"year"`
+	Color                 string    `json:"color"`
+	CarType               string    `json:"car_type"`
+	FuelType              string    `json:"fuel_type"`
+	Variant               string    `json:"variant"`
+	Kms                   int       `json:"kms"`
+	Ownership             int       `json:"ownership"`
+	Bannerimage           string    `json:"bannerimage"`
+	Transmission          string    `json:"transmission"`
+	Images                []Image   `gorm:"foreignKey:CarID" json:"images"`
+	RegNo                 string    `json:"regno"`
+	Status                string    `json:"status"`
+	Price                 int       `json:"price"`
+	CreatedAt             time.Time `json:"created_at"`
+	UpdatedAt             time.Time `json:"updated_at"`
+	Engine_size           string    `json:"engine_size"`           //new ones
+	Year_of_manufacturing string    `json:"year_of_manufacturing"` //new ones
+	Insurance_date        string    `json:"insurance_dating"`      //new ones
+	Location              string    `json:"location"`              //new ones
 }
 type Image struct {
 	ID    uint   `gorm:"primaryKey;autoIncrement" json:"id"`

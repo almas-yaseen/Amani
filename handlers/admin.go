@@ -16,15 +16,85 @@ import (
 	"gorm.io/gorm"
 )
 
-// func GetChoices(c *gin.Context) {
+func Dashboard(db *gorm.DB) gin.HandlerFunc {
+	fmt.Println("here is the dashboard")
+	return func(c *gin.Context) {
+		var cars []domain.Car
 
-// 	c.JSON(http.StatusOk,gin.H{
-// 		"car_types":[]string {
-// 			domain.c
-// 		}
-// 	})
+		if err := db.Find(&cars).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch the database"})
+			return
+		}
 
-// }
+		// Fetch associated images for each car
+		for i, car := range cars {
+			var images []domain.Image
+			if err := db.Where("car_id = ?", car.ID).Find(&images).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch images"})
+				return
+			}
+			cars[i].Images = images
+
+			// Fetch the existing CarType and FuelType for the car
+			// Assuming you have stored CarType and FuelType in the database along with Car entity
+			var existingCar domain.Car
+			if err := db.Where("id = ?", car.ID).First(&existingCar).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch existing car details"})
+				return
+			}
+			cars[i].CarType = existingCar.CarType
+			cars[i].FuelType = existingCar.FuelType
+		}
+
+		// Now, fetch all images for all cars
+		var allImages []domain.Image
+		if err := db.Find(&allImages).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch all images"})
+			return
+		}
+
+		// Define your car types and fuel types
+		carTypes := []string{
+			domain.CarTypeSedan,
+			domain.CarTypeHatchback,
+			domain.CarTypeSuv,
+			domain.CarTypeBike,
+		}
+
+		fuelTypes := []string{
+			domain.FuelTypePetrol,
+			domain.FuelTypeDiesel,
+			domain.FuelTypeCNG,
+			domain.FuelTypeElectric,
+		}
+
+		// Pass both cars, images, carTypes, and fuelTypes to the HTML template
+		c.HTML(http.StatusOK, "admin.html", gin.H{
+			"Cars":      cars,
+			"Images":    allImages,
+			"CarTypes":  carTypes,
+			"FuelTypes": fuelTypes,
+		})
+	}
+}
+func GetChoices(c *gin.Context) {
+
+	c.JSON(http.StatusOK, gin.H{
+		"car_types": []string{
+			domain.CarTypeSedan,
+			domain.CarTypeHatchback,
+			domain.CarTypeSuv,
+			domain.CarTypeBike,
+		},
+		"fuel_types": []string{
+			domain.FuelTypePetrol,
+			domain.FuelTypeDiesel,
+			domain.FuelTypeCNG,
+			domain.FuelTypeElectric,
+		},
+	})
+
+}
 
 func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -150,39 +220,6 @@ func Get_Pdf_Report(db *gorm.DB) gin.HandlerFunc {
 
 // Register the route
 
-func Dashboard(db *gorm.DB) gin.HandlerFunc {
-	fmt.Println("here is the dashboard")
-	return func(c *gin.Context) {
-		var cars []domain.Car
-
-		if err := db.Find(&cars).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch the database"})
-			return
-		}
-
-		// Fetch associated images for each car
-		for i, car := range cars {
-			fmt.Println("here is the i cand car", i, car)
-			var images []domain.Image
-			if err := db.Where("car_id = ?", car.ID).Find(&images).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch images"})
-				return
-			}
-			cars[i].Images = images
-
-		}
-
-		// Now, fetch all images for all cars
-		var allImages []domain.Image
-		if err := db.Find(&allImages).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch all images"})
-			return
-		}
-
-		// Pass both cars and images to the HTML template
-		c.HTML(http.StatusOK, "admin.html", gin.H{"Cars": cars, "Images": allImages})
-	}
-}
 func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Set CORS headers
@@ -310,6 +347,10 @@ func AddCar(db *gorm.DB) gin.HandlerFunc {
 		car.RegNo = c.PostForm("regno")
 		car.Status = c.PostForm("status")
 		car.Price, _ = strconv.Atoi(c.PostForm("price"))
+		car.CarType = c.PostForm("car_type")
+		fmt.Println("here is the car type", car.CarType)
+		car.FuelType = c.PostForm("fuel_type")
+		fmt.Println("here is the fuel type", car.FuelType)
 
 		form, err := c.MultipartForm() // allows files to be uploaded along with other form fields
 		if err != nil {
