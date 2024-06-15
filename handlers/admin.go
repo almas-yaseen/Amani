@@ -16,6 +16,57 @@ import (
 	"gorm.io/gorm"
 )
 
+func GetYoutubeLinks(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var links []domain.YoutubeLink
+
+		// Fetch all YouTube links from the database
+		if err := db.Find(&links).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch YouTube links"})
+			return
+		}
+
+		// Respond with JSON containing YouTube links
+		c.JSON(http.StatusOK, links)
+	}
+}
+
+// Youtube_link handles POST requests to add multiple YouTube links
+func Youtube_link(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Parse multipart form data
+		err := c.Request.ParseMultipartForm(10 << 20) // 10 MB max size
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Extract links from the form data
+		links := c.Request.PostForm["links[]"]
+		fmt.Println("Received links:", links)
+
+		var youtubeLinks []domain.YoutubeLink
+
+		// Iterate over each link
+		for _, link := range links {
+			// Create YoutubeLink object and append to slice
+			youtubeLink := domain.YoutubeLink{
+				VideoLink: link, // Assuming link is already a URL string
+			}
+			youtubeLinks = append(youtubeLinks, youtubeLink)
+		}
+
+		// Insert into the database
+		if err := db.Create(&youtubeLinks).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save links to database"})
+			return
+		}
+
+		// Respond with success message
+		c.Redirect(http.StatusSeeOther, "/admin")
+	}
+}
 func Logout(c *gin.Context) {
 	// Clear the authentication cookie
 	c.SetCookie("authenticated", "", -1, "/", "", false, true)
@@ -27,6 +78,7 @@ func AdminLogin(c *gin.Context) {
 	fmt.Println("akdbkabkhjasbhkjbasdkjhkjhadbhkdsc")
 	if c.Request.Method == http.MethodPost {
 		username := c.PostForm("username")
+		fmt.Println("here is the username and asdasd", username)
 		password := c.PostForm("password")
 		fmt.Println("here is the username", username)
 

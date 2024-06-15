@@ -53,6 +53,7 @@
                     <i class="fas fa-car"></i>
                 </div>
                 <div class="sidebar-brand-text mx-3">Amani motors <sup></sup></div>
+
             </a>
 
             <!-- Divider -->
@@ -75,6 +76,59 @@
             <div class="sidebar-heading">
                 Addons
             </div>
+            <br>
+            <br>
+            <div class="sidebar-heading" id="showform">
+                <a href="#addCarModals" data-toggle="modal"><button type="button" class="btn btn-success"> Add Youtube Video</button></a>
+            </div>
+            <div id="addCarModals" class="modal fade">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form action="/admin/get_youtube_link_form" method="post" enctype="multipart/form-data">
+                            <div class="modal-header">                        
+                                <h4 class="modal-title">Add Youtube link</h4>
+                                
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            </div>
+                            <div class="modal-body">                    
+                                
+        
+                                
+                              
+        
+        
+        
+        
+        
+                                
+
+                                <div class="form-group">
+                                    <label>Add link</label>
+                                    <div id="Youtubelinkcontainer">
+                                        <input type="url" name="links[]" class="form-control" required>
+                                    </div>
+                                    <button type="button" id="addAnotherlink" class="btn btn-primary mt-2">Add Another Link</button>
+                                    
+                                </div>                                
+                            </div>
+                            <div class="modal-footer">
+                                <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                                <input type="submit" class="btn btn-success" value="Add">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+
+            <br>
+            <br>
+
 
             <!-- Nav Item - Pages Collapse Menu -->
            
@@ -189,7 +243,7 @@
 					<div class="col-sm-6">
 						<a href="#addCarModal" class="btn btn-success" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Add New Car</span></a>
                         <a href="#logoutModal" class="btn btn-danger" data-toggle="modal">
-                            <i class="material-icons">&#xE147;</i> <span>Logout</span>
+                            <i class="material-icons">&#xE879;</i> <span>Logout</span>
                         </a>
                         
                         <!-- Logout Modal -->
@@ -495,6 +549,7 @@
                         <div class="form-group">
                             <label>Banner Image</label>
                             <img src="{{.Bannerimage}}" alt="Existing Banner Image" style="width: 100px; height: auto;">
+                            <a href="https://www.remove.bg/upload" target="blank"><p><strong>Click here to remove background<strong></p></a>
                             <input type="file" name="bannerimage" class="form-control">
                         </div>
                         <div class="form-group">
@@ -561,13 +616,7 @@
             <!-- End of Main Content -->
 
             <!-- Footer -->
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2021</span>
-                    </div>
-                </div>
-            </footer>
+          
             <!-- End of Footer -->
 
         </div>
@@ -600,128 +649,27 @@
             </div>
         </div>
     </div>
-   
-    <script>
-      
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/myapp/get_choices')
-                .then(response => response.json())
-                .then(data => {
-                    const carTypes = data.car_types;
-                    const fuelTypes = data.fuel_types;
-        
-                    const carTypeSelect = document.getElementById('carType');
-                    const fuelTypeSelect = document.getElementById('fuelType');
-        
-                    carTypes.forEach(carType => {
-                        const option = document.createElement('option');
-                        option.value = carType;
-                        option.textContent = carType;
-                        carTypeSelect.appendChild(option);
-                    });
-        
-                    fuelTypes.forEach(fuelType => {
-                        const option = document.createElement('option');
-                        option.value = fuelType;
-                        option.textContent = fuelType;
-                        fuelTypeSelect.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error fetching choices:', error));
-        });
-
-
-
-
-
-
-
-
-
-
-
-        // Function to add a new file input
-        function addImageInput() {
-            const container = document.getElementById('imageInputsContainer');
-            const newInput = document.createElement('input');
-            newInput.type = 'file';
-            newInput.name = 'images[]';
-            newInput.classList.add('form-control-file', 'image-input');
-            newInput.accept = 'image/*';
-            container.appendChild(newInput);
-        }
-    
-        // Event listener to handle click on the "Add Another Image" button
-        document.getElementById('addImageInput').addEventListener('click', function() {
-            addImageInput();
-        });
-    
-        // Event listener to handle change in file inputs
-        document.getElementById('imageInputsContainer').addEventListener('change', function(event) {
-            if (event.target && event.target.classList.contains('image-input')) {
-                const files = event.target.files;
-                const previewContainer = document.getElementById('imagePreview');
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    const reader = new FileReader();
-                    reader.onload = function() {
-                        const image = new Image();
-                        image.src = reader.result;
-                        image.classList.add('square-image');
-                        previewContainer.appendChild(image);
-                    }
-                    reader.readAsDataURL(file);
-                }
-            }
-        });
-    
-        // Event listener to handle PDF generation button click
-        document.addEventListener("DOMContentLoaded", function() {
-            document.getElementById("generateReportButton").addEventListener("click", function() {
-                // Send a request to fetch the PDF file
-                fetch("/admin/cars/pdf_report")
-                    .then(response => response.blob())
-                    .then(blob => {
-                        // Create a URL for the blob
-                        const url = window.URL.createObjectURL(blob);
-    
-                        // Create a link element
-                        const a = document.createElement("a");
-                        a.href = url;
-                        a.download = "report.pdf"; // Set the file name for download
-                        document.body.appendChild(a);
-                        
-                        // Trigger the click event to start the download
-                        a.click();
-    
-                        // Remove the link element after download
-                        window.URL.revokeObjectURL(url);
-                        document.body.removeChild(a);
-                    })
-                    .catch(error => console.error("Error fetching PDF:", error));
-            });
-        });
-    </script>
-    <!-- Bootstrap core JavaScript-->
+    <script src="/static/js/almas.js"></script>
     <script src="/static/vendor/jquery/jquery.min.js"></script>
     <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Core plugin JavaScript-->
+ 
     <script src="/static/vendor/jquery-easing/jquery.easing.min.js"></script>
 
-    <!-- Custom scripts for all pages-->
+   
     <script src="/static/js/sb-admin-2.min.js"></script>
 
-    <!-- Page level plugins -->
+  
     <script src="/static/vendor/chart.js/Chart.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 
 
-    <!-- Page level custom scripts -->
+   
     <script src="/static/js/demo/chart-area-demo.js"></script>
     <script src="/static/js/demo/chart-pie-demo.js"></script>
+    
 
 </body>
 
