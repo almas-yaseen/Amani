@@ -1,6 +1,10 @@
 package domain
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 const (
 
@@ -45,4 +49,13 @@ type Image struct {
 	ID    uint   `gorm:"primaryKey;autoIncrement" json:"id"`
 	CarID uint   `json:"car_id"`
 	Path  string `json:"path"`
+}
+
+type User struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+type YoutubeLink struct {
+	gorm.Model
+	VideoLink string `json:"video_link"`
 }

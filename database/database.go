@@ -24,6 +24,8 @@ func ConnectDatabase(cfg config.Config) (*gorm.DB, error) {
 
 	DB.AutoMigrate(&domain.Car{})
 	DB.AutoMigrate(&domain.Image{})
+	DB.AutoMigrate(&domain.YoutubeLink{})
+
 	return DB, nil
 
 }

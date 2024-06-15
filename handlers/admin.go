@@ -16,6 +16,85 @@ import (
 	"gorm.io/gorm"
 )
 
+func GetYoutubeLinks(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var links []domain.YoutubeLink
+
+		// Fetch all YouTube links from the database
+		if err := db.Find(&links).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch YouTube links"})
+			return
+		}
+
+		// Respond with JSON containing YouTube links
+		c.JSON(http.StatusOK, links)
+	}
+}
+
+// Youtube_link handles POST requests to add multiple YouTube links
+func Youtube_link(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Parse multipart form data
+		err := c.Request.ParseMultipartForm(10 << 20) // 10 MB max size
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Extract links from the form data
+		links := c.Request.PostForm["links[]"]
+		fmt.Println("Received links:", links)
+
+		var youtubeLinks []domain.YoutubeLink
+
+		// Iterate over each link
+		for _, link := range links {
+			// Create YoutubeLink object and append to slice
+			youtubeLink := domain.YoutubeLink{
+				VideoLink: link, // Assuming link is already a URL string
+			}
+			youtubeLinks = append(youtubeLinks, youtubeLink)
+		}
+
+		// Insert into the database
+		if err := db.Create(&youtubeLinks).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save links to database"})
+			return
+		}
+
+		// Respond with success message
+		c.Redirect(http.StatusSeeOther, "/admin")
+	}
+}
+func Logout(c *gin.Context) {
+	// Clear the authentication cookie
+	c.SetCookie("authenticated", "", -1, "/", "", false, true)
+	// Redirect to the login page
+	c.Redirect(http.StatusFound, "/admin/login")
+}
+
+func AdminLogin(c *gin.Context) {
+	fmt.Println("akdbkabkhjasbhkjbasdkjhkjhadbhkdsc")
+	if c.Request.Method == http.MethodPost {
+		username := c.PostForm("username")
+		fmt.Println("here is the username and asdasd", username)
+		password := c.PostForm("password")
+		fmt.Println("here is the username", username)
+
+		if username == "amani" && password == "amani123" {
+			c.SetCookie("authenticated", "true", 3600, "/", "", false, true)
+			c.Redirect(http.StatusFound, "/admin")
+			return
+
+		}
+		c.HTML(http.StatusUnauthorized, "login.html", gin.H{"error": "Invalid credentials"})
+		return
+	}
+	c.HTML(http.StatusOK, "login.html", nil)
+
+}
+
 func Dashboard(db *gorm.DB) gin.HandlerFunc {
 	fmt.Println("here is the dashboard")
 	return func(c *gin.Context) {
@@ -105,6 +184,13 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Credentials", "true")
 
 		var cars []domain.Car
+		var totalcount int64
+
+		if err := db.Model(&domain.Car{}).Count(&totalcount).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count "})
+			return
+
+		}
 
 		if err := db.Order("id desc").Preload("Images").Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch the cars"})
@@ -131,6 +217,7 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 		// Populate the new structure
 		for _, car := range cars {
 			var image string
+
 			if len(car.Images) > 0 {
 				image = car.Images[0].Path // Select the first image path as the representative image
 			}
@@ -152,7 +239,7 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 			result = append(result, carWithImage)
 		}
 
-		c.JSON(http.StatusOK, gin.H{"status": "success", "vehicles": result})
+		c.JSON(http.StatusOK, gin.H{"status": "success", "vehicles": result, "totalcount": totalcount})
 	}
 }
 
@@ -238,6 +325,10 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 
 		// Create a structure to hold the response data
 		type CarDetail struct {
+			ID          uint   `json:"id"`
+			Car_type    string `json:"car_type"`
+			Brand       string `json:"brand"`
+			Year        int    `json:"year"`
 			BannerImage string `json:"bannerImage"`
 			Model       string `json:"model"`
 			Variant     string `json:"variant"`
@@ -249,6 +340,10 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 
 		for _, car := range cars {
 			carDetail := CarDetail{
+				ID:          car.ID,
+				Year:        car.Year,
+				Brand:       car.Brand,
+				Car_type:    car.CarType,
 				BannerImage: car.Bannerimage,
 				Model:       car.Model,
 				Variant:     car.Variant,
@@ -350,16 +445,19 @@ func AddCar(db *gorm.DB) gin.HandlerFunc {
 		car.CarType = c.PostForm("car_type")
 		fmt.Println("here is the car type", car.CarType)
 		car.FuelType = c.PostForm("fuel_type")
-		fmt.Println("here is the fuel type", car.FuelType)
+		car.Year_of_manufacturing = c.PostForm("year_of_manufacturing") //new
 
+		fmt.Println("here is the manu", car.Year_of_manufacturing)
+		car.Engine_size = c.PostForm("engine_size")       //new
+		car.Insurance_date = c.PostForm("insurance_date") //new
+		car.Location = c.PostForm("location")             //new
+		fmt.Println("here is the fuel type", car.FuelType)
 		form, err := c.MultipartForm() // allows files to be uploaded along with other form fields
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to get the form"})
 			return
 		}
-
 		bannerImage, err := c.FormFile("bannerimage")
-
 		// Create the full path for the banner image
 		bannerImagePath := filepath.Join("uploads", fmt.Sprintf("%d_%s", car.ID, bannerImage.Filename))
 		fmt.Println("here is the banner image path come on let asscd", bannerImagePath)
@@ -416,6 +514,12 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 		car.Year = year
+		car.CarType = c.PostForm("car_type")
+		car.FuelType = c.PostForm("fuel_type")
+		car.Year_of_manufacturing = c.PostForm("year_of_manufacturing") //new
+		car.Engine_size = c.PostForm("engine_size")                     //new
+		car.Insurance_date = c.PostForm("insurance_date")               //new
+		car.Location = c.PostForm("location")
 		car.Color = c.PostForm("color")
 		car.Variant = c.PostForm("variant")
 		car.Kms, _ = strconv.Atoi(c.PostForm("kms"))
