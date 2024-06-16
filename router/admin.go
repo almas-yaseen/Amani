@@ -10,14 +10,16 @@ import (
 
 func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 
-	r.GET("/admin/login", handlers.AdminLogin) // getting the form
+	myapp := r.Group("/myapp")
+
+	r.GET("/admin/login", handlers.AdminLogin) // gettin
 	r.POST("/adminlogin", handlers.AdminLogin) // submitting the form
-	r.GET("myapp/get_youtube_links", handlers.GetYoutubeLinks(db))
-	r.GET("/myapp/get_banner_vehicles", handlers.Get_Banner_Vehicles(db))
-	r.GET("/myapp/get_choices", handlers.GetChoices)
-	r.GET("/myapp/get_all_vehicles_homepage", handlers.GetAllVehicles(db))
-	r.GET("/myapp/get_stockcar_all", handlers.Get_Stock_Car_All(db))
-	r.GET("/myapp/get_specific_vehicle/:id", handlers.Get_Specific_Vehicle(db))
+	myapp.GET("/get_youtube_links", handlers.GetYoutubeLinks(db))
+	myapp.GET("/get_banner_vehicles", handlers.Get_Banner_Vehicles(db))
+	myapp.GET("/get_choices", handlers.GetChoices)
+	myapp.GET("/get_all_vehicles_homepage", handlers.GetAllVehicles(db))
+	myapp.GET("/get_stockcar_all", handlers.Get_Stock_Car_All(db))
+	myapp.GET("/get_specific_vehicle/:id", handlers.Get_Specific_Vehicle(db))
 
 	admin := r.Group("/admin")
 
