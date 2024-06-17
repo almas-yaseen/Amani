@@ -2,8 +2,6 @@ package domain
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 const (
@@ -56,6 +54,6 @@ type User struct {
 	Password string `json:"password"`
 }
 type YoutubeLink struct {
-	gorm.Model
+	ID        uint   `json:"id"`
 	VideoLink string `json:"video_link"`
 }

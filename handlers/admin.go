@@ -16,6 +16,187 @@ import (
 	"gorm.io/gorm"
 )
 
+func GetFilterTypeCar(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var cars []domain.Car
+
+		brand := c.Query("brand")
+		carType := c.Query("car_type")
+		fuelType := c.Query("fuel_type")
+		minPrice := c.Query("min_price")
+		maxPrice := c.Query("max_price")
+
+		query := db.Model(&domain.Car{})
+
+		if brand != "" {
+			query = query.Where("brand = ?", brand)
+		}
+		if carType != "" {
+			query = query.Where("car_type = ?", carType)
+		}
+		if fuelType != "" {
+			query = query.Where("fuel_type = ?", fuelType)
+		}
+
+		if minPrice != "" {
+			minPriceFloat, err := strconv.ParseFloat(minPrice, 64)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "invalid min_price format"})
+				return
+			}
+			query = query.Where("price >= ?", minPriceFloat)
+		}
+
+		if maxPrice != "" {
+			maxPriceFloat, err := strconv.ParseFloat(maxPrice, 64)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "invalid max_price format"})
+				return
+			}
+			query = query.Where("price <= ?", maxPriceFloat)
+		}
+
+		if err := query.Find(&cars).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch cars"})
+			return
+		}
+
+		c.JSON(http.StatusOK, cars)
+	}
+}
+
+func GetFilterTypes(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var filterTypes struct {
+			Brands    []string `json:"brands"`
+			CarTypes  []string `json:"car_types"`
+			FuelTypes []string `json:"fuel_types"`
+		}
+
+		// Fetch distinct brands
+		var brands []string
+		if err := db.Model(&domain.Car{}).Distinct("brand").Pluck("brand", &brands).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch brands"})
+			return
+		}
+		filterTypes.Brands = brands
+
+		// Use predefined car types and fuel types
+		filterTypes.CarTypes = []string{
+			domain.CarTypeSedan,
+			domain.CarTypeHatchback,
+			domain.CarTypeSuv,
+			domain.CarTypeBike,
+		}
+		filterTypes.FuelTypes = []string{
+			domain.FuelTypePetrol,
+			domain.FuelTypeCNG,
+			domain.FuelTypeDiesel,
+			domain.FuelTypeElectric,
+
+			// Add other fuel types here
+		}
+
+		c.JSON(http.StatusOK, filterTypes)
+	}
+}
+
+// Youtube_link handles POST requests to add multiple YouTube links
+func Adding_Youtube_Link(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Parse multipart form data
+		err := c.Request.ParseMultipartForm(10 << 20) // 10 MB max size
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Extract links from the form data
+		links := c.Request.PostForm["links[]"]
+		fmt.Println("Received links:", links)
+
+		var youtubeLinks []domain.YoutubeLink
+
+		// Iterate over each link
+		for _, link := range links {
+			// Create YoutubeLink object and append to slice
+			youtubeLink := domain.YoutubeLink{
+				VideoLink: link, // Assuming link is already a URL string
+			}
+			youtubeLinks = append(youtubeLinks, youtubeLink)
+		}
+
+		// Insert into the database
+		if err := db.Create(&youtubeLinks).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save links to database"})
+			return
+		}
+
+		// Respond with success message
+		c.Redirect(http.StatusSeeOther, "/admin/get_youtube_link_form")
+	}
+}
+
+func Youtube_page_delete(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		video_id := c.Param("id")
+		fmt.Println("here is the id", video_id)
+
+		var links domain.YoutubeLink
+
+		result := db.First(&links, video_id)
+		if result.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to do the link id incorrect"})
+			return
+		}
+
+		if err := db.Where("id=?", video_id).Delete(&domain.YoutubeLink{}).Error; err != nil {
+			c.String(http.StatusInternalServerError, "failed to delete the car")
+			return
+		}
+		c.Redirect(http.StatusSeeOther, "/admin/get_youtube_link_form")
+
+	}
+}
+
+func Youtube_page_edit(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		videoid := c.Param("id")
+		fmt.Println("here is the id", videoid)
+
+		newVideolink := c.PostForm("editVideoLink")
+
+		var link domain.YoutubeLink
+
+		result := db.First(&link, videoid)
+		if result.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to do the link"})
+			return
+
+		}
+		link.VideoLink = newVideolink
+		db.Save(&link)
+		c.Redirect(http.StatusFound, "/admin/get_youtube_link_form")
+
+	}
+}
+
+func Show_Youtube_Page(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		var links []domain.YoutubeLink
+
+		if err := db.Find(&links).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed"})
+			return
+		}
+		c.HTML(http.StatusOK, "show.html", gin.H{"links": links})
+
+	}
+}
+
 func GetYoutubeLinks(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var links []domain.YoutubeLink
