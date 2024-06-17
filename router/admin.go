@@ -16,12 +16,10 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 	r.POST("/adminlogin", handlers.AdminLogin) // submitting the form
 	myapp.GET("/get_filter_types", handlers.GetFilterTypes(db))
 	myapp.GET("/get_filter_types_data_stock_car_all", handlers.GetFilterTypeCar(db))
-
 	myapp.POST("/get_youtube_links", handlers.GetYoutubeLinks(db))
 	myapp.GET("/get_banner_vehicles", handlers.Get_Banner_Vehicles(db))
 	myapp.GET("/get_choices", handlers.GetChoices)
 	myapp.GET("/get_all_vehicles_homepage", handlers.GetAllVehicles(db))
-	myapp.GET("/get_stockcar_all", handlers.Get_Stock_Car_All(db))
 	myapp.GET("/get_specific_vehicle/:id", handlers.Get_Specific_Vehicle(db))
 
 	admin := r.Group("/admin")
