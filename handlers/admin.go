@@ -20,6 +20,8 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var cars []domain.Car
 
+		var count int64
+		fmt.Println("aksdnjkancdkjasndc")
 		brand := c.Query("brand")
 		carType := c.Query("car_type")
 		fuelType := c.Query("fuel_type")
@@ -29,6 +31,7 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 		query := db.Model(&domain.Car{})
 
 		if brand != "" {
+			fmt.Println("here is the query", brand)
 			query = query.Where("brand = ?", brand)
 		}
 		if carType != "" {
@@ -55,6 +58,10 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 			}
 			query = query.Where("price <= ?", maxPriceFloat)
 		}
+		if err := query.Count(&count).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count cars"})
+			return
+		}
 
 		if err := query.Preload("Images").Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch cars"})
@@ -80,6 +87,7 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 
 		// Populate the new structure with the filtered data
 		for _, car := range cars {
+
 			var image string
 
 			if len(car.Images) > 0 {
@@ -101,7 +109,7 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 			result = append(result, carWithImage)
 		}
 
-		c.JSON(http.StatusOK, gin.H{"status": "success", "vehicles": result})
+		c.JSON(http.StatusOK, gin.H{"status": "success", "vehicles": result, "total_count": count})
 	}
 }
 
