@@ -16,7 +16,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetFilterTypeCar(db *gorm.DB) gin.HandlerFunc {
+func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var cars []domain.Car
 
@@ -56,12 +56,52 @@ func GetFilterTypeCar(db *gorm.DB) gin.HandlerFunc {
 			query = query.Where("price <= ?", maxPriceFloat)
 		}
 
-		if err := query.Find(&cars).Error; err != nil {
+		if err := query.Preload("Images").Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch cars"})
 			return
 		}
 
-		c.JSON(http.StatusOK, cars)
+		// Define a new structure to hold the filtered data
+		type CarWithImage struct {
+			ID           uint   `json:"id"`
+			Brand        string `json:"brand"`
+			Model        string `json:"model"`
+			Year         int    `json:"year"`
+			Color        string `json:"color"`
+			Variant      string `json:"variant"`
+			Kms          int    `json:"kms"`
+			Ownership    int    `json:"ownership"`
+			Transmission string `json:"transmission"`
+			Price        int    `json:"price"`
+			Image        string `json:"image"`
+		}
+
+		var result []CarWithImage
+
+		// Populate the new structure with the filtered data
+		for _, car := range cars {
+			var image string
+
+			if len(car.Images) > 0 {
+				image = car.Images[0].Path // Select the first image path as the representative image
+			}
+			carWithImage := CarWithImage{
+				ID:           car.ID,
+				Brand:        car.Brand,
+				Model:        car.Model,
+				Year:         car.Year,
+				Color:        car.Color,
+				Variant:      car.Variant,
+				Kms:          car.Kms,
+				Ownership:    car.Ownership,
+				Transmission: car.Transmission,
+				Price:        car.Price,
+				Image:        image,
+			}
+			result = append(result, carWithImage)
+		}
+
+		c.JSON(http.StatusOK, gin.H{"status": "success", "vehicles": result})
 	}
 }
 
@@ -356,7 +396,7 @@ func GetChoices(c *gin.Context) {
 
 }
 
-func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
+func Get_Stock_Car_All_unit(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Set CORS headers
 		c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
