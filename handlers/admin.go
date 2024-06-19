@@ -17,6 +17,30 @@ import (
 	"gorm.io/gorm"
 )
 
+func setCORSHeaders(c *gin.Context) {
+	allowedOrigins := map[string]bool{
+		"http://localhost:5173":           true,
+		"https://amani-motors.vercel.app": true,
+		"https://amanimotors.in":          true,
+		"https://www.amanimotors.in":      true,
+	}
+
+	origin := c.Request.Header.Get("Origin")
+	if allowedOrigins[origin] {
+		c.Header("Access-Control-Allow-Origin", origin)
+	}
+
+	c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+	c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
+	c.Header("Access-Control-Allow-Credentials", "true")
+}
+
+func handleOptionsRequest(c *gin.Context) {
+	if c.Request.Method == "OPTIONS" {
+		c.AbortWithStatus(http.StatusOK)
+	}
+}
+
 func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var cars []domain.Car
@@ -114,42 +138,6 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-func GetFilterTypes(db *gorm.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var filterTypes struct {
-			Brands    []string `json:"brands"`
-			CarTypes  []string `json:"car_types"`
-			FuelTypes []string `json:"fuel_types"`
-		}
-
-		// Fetch distinct brands
-		var brands []string
-		if err := db.Model(&domain.Car{}).Distinct("brand").Pluck("brand", &brands).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch brands"})
-			return
-		}
-		filterTypes.Brands = brands
-
-		// Use predefined car types and fuel types
-		filterTypes.CarTypes = []string{
-			domain.CarTypeSedan,
-			domain.CarTypeHatchback,
-			domain.CarTypeSuv,
-			domain.CarTypeBike,
-		}
-		filterTypes.FuelTypes = []string{
-			domain.FuelTypePetrol,
-			domain.FuelTypeCNG,
-			domain.FuelTypeDiesel,
-			domain.FuelTypeElectric,
-
-			// Add other fuel types here
-		}
-
-		c.JSON(http.StatusOK, filterTypes)
-	}
-}
-
 // Youtube_link handles POST requests to add multiple YouTube links
 func Adding_Youtube_Link(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -184,6 +172,42 @@ func Adding_Youtube_Link(db *gorm.DB) gin.HandlerFunc {
 
 		// Respond with success message
 		c.Redirect(http.StatusSeeOther, "/admin/get_youtube_link_form")
+	}
+}
+func GetFilterTypes(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		setCORSHeaders(c)
+		handleOptionsRequest(c)
+
+		var filterTypes struct {
+			Brands    []string `json:"brands"`
+			CarTypes  []string `json:"car_types"`
+			FuelTypes []string `json:"fuel_types"`
+		}
+
+		// Fetch distinct brands
+		var brands []string
+		if err := db.Model(&domain.Car{}).Distinct("brand").Pluck("brand", &brands).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch brands"})
+			return
+		}
+		filterTypes.Brands = brands
+
+		// Use predefined car types and fuel types
+		filterTypes.CarTypes = []string{
+			domain.CarTypeSedan,
+			domain.CarTypeHatchback,
+			domain.CarTypeSuv,
+			domain.CarTypeBike,
+		}
+		filterTypes.FuelTypes = []string{
+			domain.FuelTypePetrol,
+			domain.FuelTypeCNG,
+			domain.FuelTypeDiesel,
+			domain.FuelTypeElectric,
+		}
+
+		c.JSON(http.StatusOK, filterTypes)
 	}
 }
 
@@ -585,28 +609,22 @@ func Get_Pdf_Report(db *gorm.DB) gin.HandlerFunc {
 }
 
 // Register the route
-
 func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Set CORS headers
-		// Set CORS headers
-		allowedOrigins := "http://localhost:5173, https://amani-motors.vercel.app,https://amanimotors.in, https://www.amanimotors.in"
-		c.Header("Access-Control-Allow-Origin", allowedOrigins)
-		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
-		c.Header("Access-Control-Allow-Credentials", "true")
+		setCORSHeaders(c)
+		handleOptionsRequest(c)
+
+		// Fetch the latest 5 cars
 		var cars []domain.Car
-
 		if err := db.Order("id desc").Limit(5).Find(&cars).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch tha database"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch the database"})
 			return
-
 		}
 
 		// Create a structure to hold the response data
 		type CarDetail struct {
 			ID          uint   `json:"id"`
-			Car_type    string `json:"car_type"`
+			CarType     string `json:"car_type"`
 			Brand       string `json:"brand"`
 			Year        int    `json:"year"`
 			BannerImage string `json:"bannerImage"`
@@ -621,9 +639,9 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 		for _, car := range cars {
 			carDetail := CarDetail{
 				ID:          car.ID,
-				Year:        car.Year,
+				CarType:     car.CarType,
 				Brand:       car.Brand,
-				Car_type:    car.CarType,
+				Year:        car.Year,
 				BannerImage: car.Bannerimage,
 				Model:       car.Model,
 				Variant:     car.Variant,
@@ -639,17 +657,12 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 }
 func GetAllVehicles(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Set CORS headers
-		// Set CORS headers
-		allowedOrigins := "http://localhost:5173, https://amani-motors.vercel.app,https://amanimotors.in, https://www.amanimotors.in"
-		c.Header("Access-Control-Allow-Origin", allowedOrigins)
-		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
-		c.Header("Access-Control-Allow-Credentials", "true")
+		setCORSHeaders(c)
+		handleOptionsRequest(c)
 
 		var cars []domain.Car
 
-		if err := db.Order("id desc").Limit(6).Preload("Images").Find(&cars).Error; err != nil { //
+		if err := db.Order("id desc").Limit(6).Preload("Images").Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch the cars"})
 			return
 		}
