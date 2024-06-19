@@ -456,7 +456,7 @@ func Get_Stock_Car_All_unit(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Set CORS headers
 		// Set CORS headers
-		allowedOrigins := "http://localhost:5173, https://amani-motors.vercel.app"
+		allowedOrigins := "http://localhost:5173, https://amani-motors.vercel.app,amanimotors.in, www.amanimotors.in"
 		c.Header("Access-Control-Allow-Origin", allowedOrigins)
 		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
@@ -590,7 +590,7 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Set CORS headers
 		// Set CORS headers
-		allowedOrigins := "http://localhost:5173, https://amani-motors.vercel.app"
+		allowedOrigins := "http://localhost:5173, https://amani-motors.vercel.app,amanimotors.in, www.amanimotors.in"
 		c.Header("Access-Control-Allow-Origin", allowedOrigins)
 		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
@@ -641,7 +641,7 @@ func GetAllVehicles(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Set CORS headers
 		// Set CORS headers
-		allowedOrigins := "http://localhost:5173, https://amani-motors.vercel.app"
+		allowedOrigins := "http://localhost:5173, https://amani-motors.vercel.app,amanimotors.in, www.amanimotors.in"
 		c.Header("Access-Control-Allow-Origin", allowedOrigins)
 		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")

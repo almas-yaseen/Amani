@@ -29,7 +29,7 @@ func main() {
 
 	// Custom CORS configuration
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "https://amani-motors.vercel.app/"},
+		AllowOrigins:     []string{"http://localhost:5173", "https://amani-motors.vercel.app/", "amanimotors.in", "www.amanimotors.in"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,
