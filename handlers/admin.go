@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"ginapp/domain"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -323,30 +324,48 @@ func AdminLogin(c *gin.Context) {
 	c.HTML(http.StatusOK, "login.html", nil)
 
 }
-
 func Dashboard(db *gorm.DB) gin.HandlerFunc {
-	fmt.Println("here is the dashboard")
 	return func(c *gin.Context) {
-		var cars []domain.Car
+		var (
+			cars       []domain.Car
+			totalCount int64
+			page       int
+			limit      int
+			offset     int
+		)
 
-		if err := db.Find(&cars).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch the database"})
+		// Parse query parameters for pagination
+		page, _ = strconv.Atoi(c.DefaultQuery("page", "1"))
+		if page < 1 {
+			page = 1
+		}
+		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "2")) // Default limit to 2 if not provided
+
+		// Calculate offset
+		offset = (page - 1) * limit
+
+		// Fetch cars with pagination
+		if err := db.Limit(limit).Offset(offset).Find(&cars).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch cars"})
 			return
 		}
 
-		// Fetch associated images for each car
-		for i, car := range cars {
-			var images []domain.Image
-			if err := db.Where("car_id = ?", car.ID).Find(&images).Error; err != nil {
+		// Fetch total count of cars (for pagination)
+		if err := db.Model(&domain.Car{}).Count(&totalCount).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch total count"})
+			return
+		}
+
+		// Fetch associated images for each car (if Image is a related entity)
+		for i := range cars {
+			if err := db.Model(&cars[i]).Association("Images").Find(&cars[i].Images); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch images"})
 				return
 			}
-			cars[i].Images = images
 
 			// Fetch the existing CarType and FuelType for the car
-			// Assuming you have stored CarType and FuelType in the database along with Car entity
 			var existingCar domain.Car
-			if err := db.Where("id = ?", car.ID).First(&existingCar).Error; err != nil {
+			if err := db.Where("id = ?", cars[i].ID).First(&existingCar).Error; err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch existing car details"})
 				return
 			}
@@ -354,37 +373,25 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 			cars[i].FuelType = existingCar.FuelType
 		}
 
-		// Now, fetch all images for all cars
-		var allImages []domain.Image
-		if err := db.Find(&allImages).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch all images"})
-			return
+		// Generate pagination links
+		totalPages := int(math.Ceil(float64(totalCount) / float64(limit)))
+		pages := make([]int, totalPages)
+		for i := range pages {
+			pages[i] = i + 1
 		}
 
-		// Define your car types and fuel types
-		carTypes := []string{
-			domain.CarTypeSedan,
-			domain.CarTypeHatchback,
-			domain.CarTypeSuv,
-			domain.CarTypeBike,
-		}
-
-		fuelTypes := []string{
-			domain.FuelTypePetrol,
-			domain.FuelTypeDiesel,
-			domain.FuelTypeCNG,
-			domain.FuelTypeElectric,
-		}
-
-		// Pass both cars, images, carTypes, and fuelTypes to the HTML template
+		// Pass cars, pagination info, and other necessary data to the HTML template
 		c.HTML(http.StatusOK, "admin.html", gin.H{
-			"Cars":      cars,
-			"Images":    allImages,
-			"CarTypes":  carTypes,
-			"FuelTypes": fuelTypes,
+			"Cars":       cars,
+			"TotalCount": totalCount,
+			"Page":       page,
+			"Limit":      limit,
+			"TotalPages": totalPages,
+			"Pages":      pages,
 		})
 	}
 }
+
 func GetChoices(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
