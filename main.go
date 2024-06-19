@@ -29,7 +29,7 @@ func main() {
 
 	// Custom CORS configuration
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"}, // Allow your React frontend
+		AllowOrigins:     []string{"http://localhost:5173", "https://amani-motors.vercel.app/"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,
