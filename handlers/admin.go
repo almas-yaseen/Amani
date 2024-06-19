@@ -18,7 +18,7 @@ import (
 )
 
 func setCORSHeaders(c *gin.Context) {
-	c.Header("Access-Control-Allow-Origin", "https://www.amanimotors.in")
+	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 	c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
 	c.Header("Access-Control-Allow-Credentials", "true")
@@ -603,8 +603,7 @@ func Get_Pdf_Report(db *gorm.DB) gin.HandlerFunc {
 
 // Register the route
 func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
-	setCORSHeaders(c)
-	handleOptionsRequest(c)
+
 	return func(c *gin.Context) {
 		setCORSHeaders(c)
 		handleOptionsRequest(c)
