@@ -51,7 +51,7 @@
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/admin">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-car"></i>
                 </div>
@@ -198,6 +198,8 @@
                             <i class="fas fa-download fa-sm text-white-50"></i> Generate Report
                         </a>
                     </div>
+                    <br>
+                    <br>
                     <div class="row ">
                         <div style="max-width: 100%;" class="container">
                             <div class="table-responsive">
@@ -229,7 +231,7 @@
                                                 <th>RegNo</th>
                                                 <th>Status</th>
                                                 <th>Engine size</th>
-                                                <th>Manufacturing Year</th>
+                                             
                                                 <th>Insurance date</th>
                                                 <th>Location</th>
                                                 <th>Action</th>
@@ -262,7 +264,7 @@
                                                 <td>{{.RegNo}}</td>
                                                 <td>{{.Status}}</td>
                                                 <td>{{.Engine_size}}</td>
-                                                <td>{{.Year_of_manufacturing}}</td>
+                                               
                                                 <td>{{.Insurance_date}}</td>
                                                 <td>{{.Location}}</td>
                                                 <td>
@@ -308,25 +310,25 @@
                                         <div class="modal-body">
                                             <div class="form-group">
                                                 <label>Brand</label>
-                                                <input type="text" name="brand" placeholder="eg:Maruti Suzuki" class="form-control" required>
+                                                <input type="text" name="brand" placeholder="eg" class="form-control" required>
                                             </div>
 
                                             <div class="form-group">
                                                 <label>Year of manufacturing</label>
-                                                <input type="text" name="year_of_manufacturing" placeholder="eg:2015" class="form-control"
+                                                <input type="text" name="year_of_manufacturing" class="form-control"
                                                     required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Engine size</label>
-                                                <input type="text" name="engine_size" placeholder="eg:2.0" class="form-control" required>
+                                                <input type="text" name="engine_size" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Insurance date</label>
-                                                <input type="text" name="insurance_date" placeholder="eg:01-01-2024" class="form-control" required>
+                                                <input type="text" name="insurance_date" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Location</label>
-                                                <input type="text" name="location" placeholder="eg:kochi" class="form-control" required>
+                                                <input type="text" name="location" class="form-control" required>
                                             </div>
 
 
@@ -335,7 +337,7 @@
 
                                             <div class="form-group">
                                                 <label>Model</label>
-                                                <input type="text" name="model" placeholder="eg:swift" class="form-control" required>
+                                                <input type="text" name="model" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Year</label>
@@ -343,31 +345,31 @@
                                             </div>
                                             <div class="form-group">
                                                 <label>Color</label>
-                                                <input type="text" name="color" placeholder="eg:Green" class="form-control" required>
+                                                <input type="text" name="color" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Variant</label>
-                                                <input type="text" name="variant" placeholder="eg:VDI" class="form-control" required>
+                                                <input type="text" name="variant" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Kms</label>
-                                                <input type="number" name="kms" placeholder="eg:25000" class="form-control" required>
+                                                <input type="number" name="kms" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Ownership</label>
-                                                <input type="number" name="ownership" placeholder="eg:2" class="form-control" required>
+                                                <input type="number" name="ownership" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Transmission</label>
-                                                <input type="text" name="transmission" placeholder="eg:Manual" class="form-control" required>
+                                                <input type="text" name="transmission" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Price</label>
-                                                <input type="number" name="price" placeholder="eg:3500000" class="form-control" required>
+                                                <input type="number" name="price" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Car Type</label>
-                                                <select name="car_type" id="carType"  class="form-control" requried>
+                                                <select name="car_type" id="carType" class="form-control" requried>
                                                 </select>
                                             </div>
                                             <div class="form-group">
@@ -400,11 +402,14 @@
 
                                             <div class="form-group">
                                                 <label>RegNo</label>
-                                                <input type="text" placeholder="eg:KL-07-1234" name="regno" class="form-control" required>
+                                                <input type="text" name="regno" class="form-control" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Status</label>
-                                                <input type="text" name="status" class="form-control" required>
+                                                <select name="status" class="form-control" required>
+                                                    <option value="sold">Sold</option>
+                                                    <option value="available">Available</option>
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
@@ -434,11 +439,7 @@
                                                     required>
                                             </div>
 
-                                            <div class="form-group">
-                                                <label>Year of manufacturing</label>
-                                                <input type="text" name="year_of_manufacturing"
-                                                    value="{{.Year_of_manufacturing}}" class="form-control" required>
-                                            </div>
+                                         
                                             <div class="form-group">
                                                 <label>Engine size</label>
                                                 <input type="text" name="engine_size" value="{{.Engine_size}}"
@@ -542,10 +543,14 @@
                                                 <input type="text" name="regno" class="form-control" value="{{.RegNo}}"
                                                     required>
                                             </div>
+                                           
+                  
                                             <div class="form-group">
                                                 <label>Status</label>
-                                                <input type="text" name="status" class="form-control"
-                                                    value="{{.Status}}" required>
+                                                <select name="status" class="form-control" required>
+                                                    <option value="sold" {{if eq .Status "sold"}}selected{{end}}>Sold</option>
+                                                    <option value="available" {{if eq .Status "available"}}selected{{end}}>Available</option>
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="modal-footer">

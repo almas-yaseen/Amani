@@ -234,15 +234,51 @@ func Youtube_page_edit(db *gorm.DB) gin.HandlerFunc {
 
 func Show_Youtube_Page(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		var (
+			links      []domain.YoutubeLink
+			totalCount int64
+			page       int
+			limit      int
+			offset     int
+		)
 
-		var links []domain.YoutubeLink
+		// Parse query parameters for pagination
+		page, _ = strconv.Atoi(c.DefaultQuery("page", "1"))
+		if page < 1 {
+			page = 1
+		}
+		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "5")) // Default limit to 2 if not provided
 
-		if err := db.Find(&links).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed"})
+		// Calculate offset
+		offset = (page - 1) * limit
+
+		// Fetch total count of entries
+		// Fetch total count of entries
+		if err := db.Model(&domain.YoutubeLink{}).Count(&totalCount).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count entries"})
 			return
 		}
-		c.HTML(http.StatusOK, "show.html", gin.H{"links": links})
+		// Fetch links with pagination
+		if err := db.Limit(limit).Offset(offset).Find(&links).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch links"})
+			return
+		}
 
+		// Generate pagination links
+		totalPages := int(math.Ceil(float64(totalCount) / float64(limit)))
+		pages := make([]int, totalPages)
+		for i := range pages {
+			pages[i] = i + 1
+		}
+
+		c.HTML(http.StatusOK, "show.html", gin.H{
+			"links":      links,
+			"TotalCount": totalCount,
+			"Page":       page,
+			"Limit":      limit,
+			"TotalPages": totalPages,
+			"Pages":      pages,
+		})
 	}
 }
 
@@ -305,7 +341,12 @@ func Logout(c *gin.Context) {
 }
 
 func AdminLogin(c *gin.Context) {
-	fmt.Println("akdbkabkhjasbhkjbasdkjhkjhadbhkdsc")
+	if cookie, err := c.Cookie("authenticated"); err == nil && cookie == "true" {
+		// User is authenticated, redirect to the dashboard
+		c.Redirect(http.StatusFound, "/admin")
+		return
+	}
+
 	if c.Request.Method == http.MethodPost {
 		username := c.PostForm("username")
 		fmt.Println("here is the username and asdasd", username)
@@ -313,7 +354,7 @@ func AdminLogin(c *gin.Context) {
 		fmt.Println("here is the username", username)
 
 		if username == "amani" && password == "amani123" {
-			c.SetCookie("authenticated", "true", 3600, "/", "", false, true)
+			c.SetCookie("authenticated", "true", 36000, "/", "", false, true)
 			c.Redirect(http.StatusFound, "/admin")
 			return
 
@@ -339,7 +380,7 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 		if page < 1 {
 			page = 1
 		}
-		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "2")) // Default limit to 2 if not provided
+		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "5")) // Default limit to 2 if not provided
 
 		// Calculate offset
 		offset = (page - 1) * limit
@@ -681,9 +722,6 @@ func AddCar(db *gorm.DB) gin.HandlerFunc {
 		car.CarType = c.PostForm("car_type")
 		fmt.Println("here is the car type", car.CarType)
 		car.FuelType = c.PostForm("fuel_type")
-		car.Year_of_manufacturing = c.PostForm("year_of_manufacturing") //new
-
-		fmt.Println("here is the manu", car.Year_of_manufacturing)
 		car.Engine_size = c.PostForm("engine_size")       //new
 		car.Insurance_date = c.PostForm("insurance_date") //new
 		car.Location = c.PostForm("location")             //new
@@ -752,9 +790,9 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 		car.Year = year
 		car.CarType = c.PostForm("car_type")
 		car.FuelType = c.PostForm("fuel_type")
-		car.Year_of_manufacturing = c.PostForm("year_of_manufacturing") //new
-		car.Engine_size = c.PostForm("engine_size")                     //new
-		car.Insurance_date = c.PostForm("insurance_date")               //new
+
+		car.Engine_size = c.PostForm("engine_size")       //new
+		car.Insurance_date = c.PostForm("insurance_date") //new
 		car.Location = c.PostForm("location")
 		car.Color = c.PostForm("color")
 		car.Variant = c.PostForm("variant")
