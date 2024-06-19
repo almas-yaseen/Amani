@@ -29,7 +29,7 @@ func main() {
 
 	// Custom CORS configuration
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"https://amanimotors.in"}, // Allow your React frontend
+		AllowOrigins:     []string{"https://amanimotors.in/"}, // Allow your React frontend
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,
