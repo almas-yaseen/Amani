@@ -605,7 +605,7 @@ func Get_Pdf_Report(db *gorm.DB) gin.HandlerFunc {
 func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Set CORS headers
-		c.Header("Access-Control-Allow-Origin", "https://amanimotors.in/")
+		c.Header("Access-Control-Allow-Origin", "https://amanimotors.in")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
 		c.Header("Access-Control-Allow-Credentials", "true")
