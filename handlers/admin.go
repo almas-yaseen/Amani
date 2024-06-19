@@ -18,31 +18,23 @@ import (
 )
 
 func setCORSHeaders(c *gin.Context) {
-	allowedOrigins := map[string]bool{
-		"http://localhost:5173":           true,
-		"https://amani-motors.vercel.app": true,
-		"https://amanimotors.in":          true,
-		"https://www.amanimotors.in":      true,
-	}
-
-	origin := c.Request.Header.Get("Origin")
-	if allowedOrigins[origin] {
-		c.Header("Access-Control-Allow-Origin", origin)
-	}
-
+	c.Header("Access-Control-Allow-Origin", "https://www.amanimotors.in")
 	c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
+	c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
 	c.Header("Access-Control-Allow-Credentials", "true")
 }
 
 func handleOptionsRequest(c *gin.Context) {
 	if c.Request.Method == "OPTIONS" {
 		c.AbortWithStatus(http.StatusOK)
+		return
 	}
 }
 
 func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		setCORSHeaders(c)
+		handleOptionsRequest(c)
 		var cars []domain.Car
 
 		var count int64
@@ -477,6 +469,7 @@ func GetChoices(c *gin.Context) {
 }
 
 func Get_Stock_Car_All_unit(db *gorm.DB) gin.HandlerFunc {
+
 	return func(c *gin.Context) {
 		// Set CORS headers
 		// Set CORS headers
@@ -610,6 +603,8 @@ func Get_Pdf_Report(db *gorm.DB) gin.HandlerFunc {
 
 // Register the route
 func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
+	setCORSHeaders(c)
+	handleOptionsRequest(c)
 	return func(c *gin.Context) {
 		setCORSHeaders(c)
 		handleOptionsRequest(c)
