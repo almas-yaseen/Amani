@@ -9,12 +9,12 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Amanimotors</title>
+    <title>Admin | Amanimotors</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="/static/css/panel.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/css/panel.css">
 
     <!-- Custom fonts for this template-->
     <link href="/static/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -34,6 +34,7 @@
             margin-right: 5px;
             margin-bottom: 5px;
         }
+
         #imagePreview {
             display: flex;
             flex-wrap: wrap;
@@ -62,45 +63,61 @@
             <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
-          
+
 
             <!-- Divider -->
-         
-            
+
+
 
             <!-- Nav Item - Utilities Collapse Menu -->
-          
+
 
             <!-- Divider -->
             <hr class="sidebar-divider">
 
             <!-- Heading -->
-            <div class="sidebar-heading">
-                Addons
-            </div>
+            <!-- <div class="sidebar-heading d-flex align-items-center justify-content-around w-[100%] bg-danger">
+                <div class="sidebar-brand-icon ">
+                    <i class="fas fa-car"></i>
+                </div>
+                <p class="sidebar-brand-text mx-3">
+                    Addons
+                </p>
+            </div> -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-around w-full" href="/admin">
+                <div style="font-size: 1rem;" class=" font-weight-normal">
+                    <i class="fa fa-home"></i>
+                </div>
+                <div class="sidebar-brand-text font-weight-normal btn btn-sm btn-outline-light ">
+                    <small>Dashboard</small> <sup></sup>
+                </div>
+            </a>
+
+            <a class="sidebar-brand d-flex align-items-center justify-content-around w-full"
+                href="/admin/get_youtube_link_form">
+                <div style="font-size: 1rem;" class="d-flex align-items-center font-weight-normal">
+                    <i class="material-icons">play_circle_filled</i>
+                </div>
+                <div class="sidebar-brand-text font-weight-normal btn btn-sm btn-outline-light ">
+                    <small>YouTube</small> <sup></sup>
+                </div>
+            </a>
+
+
+
             <br>
             <br>
-           
-                <br>
-                <br>
-                <br>
-               <a href="/admin/get_youtube_link_form"> <button class="btn btn-dark">Show youtube links</button></a>
-           
 
-
-
-
-
-
+            <!-- <a href="/admin/get_youtube_link_form"> <button class="btn btn-dark">Show youtube links</button></a> -->
 
             <br>
             <br>
 
 
             <!-- Nav Item - Pages Collapse Menu -->
-           
+
             <!-- Nav Item - Charts -->
-         
+
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
@@ -109,7 +126,7 @@
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
 
-          
+
 
         </ul>
         <!-- End of Sidebar -->
@@ -118,7 +135,7 @@
         <div id="content-wrapper" class="d-flex flex-column">
 
             <!-- Main Content -->
-            <div id="content">
+            <div id="content fixed-top">
 
                 <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
@@ -129,53 +146,45 @@
                     </button>
 
                     <!-- Topbar Search -->
-                    <form
-                        class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
-                        <div class="input-group">
-                            <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
-                                aria-label="Search" aria-describedby="basic-addon2">
-                            <div class="input-group-append">
-                                <button class="btn btn-primary" type="button">
-                                    <i class="fas fa-search fa-sm"></i>
-                                </button>
+
+                    <div class="d-flex w-100 justify-content-between ">
+                        <button style="font-size: 0.8rem;" type="button"
+                            class="btn btn-sm btn-success d-flex align-items-center" data-toggle="modal"
+                            data-target="#addCarModal">
+                            <i class="material-icons">&#xE147;</i>
+                            <span class="pl-1 display-6">Add New Car</span>
+                        </button>
+                        <button style="font-size: 0.7rem;" type="button"
+                            class="btn btn-sm btn-outline-danger d-flex align-items-center" data-toggle="modal"
+                            data-target="#logoutModal">
+                            <i class="material-icons">&#xE879;</i>
+                            <span class="pl-2 display-6">Logout</span>
+                        </button>
+                    </div>
+
+                    <!-- Logout Modal -->
+                    <div id="logoutModal" class="modal fade text-black-50">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title">Confirm Logout</h4>
+                                    <button type="button" class="close" data-dismiss="modal"
+                                        aria-hidden="true">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Are you sure you want to logout?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                    <a href="/admin/logout" class="btn btn-danger">Logout</a>
+                                </div>
                             </div>
                         </div>
-                    </form>
+                    </div>
+
+
 
                     <!-- Topbar Navbar -->
-                    <ul class="navbar-nav ml-auto">
-
-                        <!-- Nav Item - Search Dropdown (Visible Only XS) -->
-                        <li class="nav-item dropdown no-arrow d-sm-none">
-                            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-search fa-fw"></i>
-                            </a>
-                            <!-- Dropdown - Messages -->
-                            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
-                                aria-labelledby="searchDropdown">
-                                <form class="form-inline mr-auto w-100 navbar-search">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control bg-light border-0 small"
-                                            placeholder="Search for..." aria-label="Search"
-                                            aria-describedby="basic-addon2">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-primary" type="button">
-                                                <i class="fas fa-search fa-sm"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </li>
-
-                        <!-- Nav Item - Alerts -->
-                        
-
-                      
-
-                     
-
                 </nav>
                 <!-- End of Topbar -->
 
@@ -183,404 +192,404 @@
                 <div class="container-fluid">
 
                     <!-- Page Heading -->
-                    <div>
-                        <a id="generateReportButton" href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                    <div class="d-flex justify-content-end">
+                        <a id="generateReportButton" href="#"
+                            class="d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                             <i class="fas fa-download fa-sm text-white-50"></i> Generate Report
                         </a>
                     </div>
                     <br>
                     <br>
                     <div class="row ">
-        <div class="container-xl">
-	          <div class="table-responsive">
-		<div class="table-wrapper">
-            <div class="table-title">
-                <div class="row">
-                    <div class="col-sm-6">
-						<h2>Manage <b>Cars</b></h2>
-                        
-					</div>
-					
-                </div>
-                <div class="row pt-2">
-                    
-
-
-                   
-					<div class="col-sm-6">
-						<a href="#addCarModal" class="btn btn-success" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Add New Car</span></a>
-                        <a href="#logoutModal" class="btn btn-danger" data-toggle="modal">
-                            <i class="material-icons">&#xE879;</i> <span>Logout</span>
-                        </a>
-                        
-                        <!-- Logout Modal -->
-                        <div id="logoutModal" class="modal fade text-black-50">
+                        <div style="max-width: 100%;" class="container">
+                            <div class="table-responsive">
+                                <div class="table-wrapper">
+                                    <div class="table-title">
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <h2>Manage <b>Cars</b></h2>
+                                            </div>
+                                        </div>
+                                        <div class="row pt-2"></div>
+                                    </div>
+                                    <table class="table table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Brand</th>
+                                                <th>Car type</th>
+                                                <th>Fuel</th>
+                                                <th>Model</th>
+                                                <th>Year</th>
+                                                <th>Color</th>
+                                                <th>Variant</th>
+                                                <th>Kms</th>
+                                                <th>Ownership</th>
+                                                <th>Transmission</th>
+                                                <th>Price</th>
+                                                <th>BannerImage</th>
+                                                <th>Image</th>
+                                                <th>RegNo</th>
+                                                <th>Status</th>
+                                                <th>Engine size</th>
+                                                <th>Manufacturing Year</th>
+                                                <th>Insurance date</th>
+                                                <th>Location</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {{range .Cars}}
+                                            <tr>
+                                                <td>{{.Brand}}</td>
+                                                <td>{{.CarType}}</td>
+                                                <td>{{.FuelType}}</td>
+                                                <td>{{.Model}}</td>
+                                                <td>{{.Year}}</td>
+                                                <td>{{.Color}}</td>
+                                                <td>{{.Variant}}</td>
+                                                <td>{{.Kms}}</td>
+                                                <td>{{.Ownership}}</td>
+                                                <td>{{.Transmission}}</td>
+                                                <td>{{.Price}}</td>
+                                                <td><img src="{{.Bannerimage}}" alt="Banner Image" class="square-image"
+                                                        style="max-width: 50px; height: auto;"></td>
+                                                <td>
+                                                    <div class="image-field">
+                                                        {{with index .Images 0}}
+                                                        <img src="{{.Path}}" alt="Car Image" class="square-image"
+                                                            style="max-width: 50px; height: auto;">
+                                                        {{end}}
+                                                    </div>
+                                                </td>
+                                                <td>{{.RegNo}}</td>
+                                                <td>{{.Status}}</td>
+                                                <td>{{.Engine_size}}</td>
+                                                <td>{{.Year_of_manufacturing}}</td>
+                                                <td>{{.Insurance_date}}</td>
+                                                <td>{{.Location}}</td>
+                                                <td>
+                                                    <a href="#editCarModal-{{.ID}}" class="edit" data-toggle="modal" data-placement="left"
+                                                        title="Edit"><i class="material-icons">&#xE254;</i></a>
+                                                    <a href="#deleteCarModal-{{.ID}}" class="delete" data-toggle="modal" data-placement="right"
+                                                        title="Delete"><i class="material-icons">&#xE872;</i></a>
+                                                </td>
+                                            </tr>
+                                            {{end}}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            
+                                <div class="clearfix">
+                                    <div class="hint-text">Showing <b>{{len .Cars}}</b> out of <b>{{.TotalCount}}</b> entries</div>
+                                    <ul class="pagination">
+                                        <li class="page-item {{if eq .Page 1}}disabled{{end}}">
+                                            <a href="?page=1&limit={{.Limit}}" class="page-link">Previous</a>
+                                        </li>
+                                        {{range $i, $page := .Pages}}
+                                        <li class="page-item {{if eq $.Page $page}}active{{end}}">
+                                            <a href="?page={{$page}}&limit={{$.Limit}}" class="page-link">{{$page}}</a>
+                                        </li>
+                                        {{end}}
+                                        <li class="page-item {{if eq .Page .TotalPages}}disabled{{end}}">
+                                            <a href="?page={{.TotalPages}}&limit={{.Limit}}" class="page-link">Next</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            
+                        </div>
+                        <!-- Add Modal HTML -->
+                        <div id="addCarModal" class="modal fade">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title">Confirm Logout</h4>
-                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p>Are you sure you want to logout?</p>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                                        <a href="/admin/logout" class="btn btn-danger">Logout</a>
-                                    </div>
+                                    <form action="/admin/cars/add" method="post" enctype="multipart/form-data">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title">Add Car</h4>
+                                            <button type="button" class="close" data-dismiss="modal"
+                                                aria-hidden="true">&times;</button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                <label>Brand</label>
+                                                <input type="text" name="brand" placeholder="eg:swift,benz,bmw" class="form-control" required>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Year of manufacturing</label>
+                                                <input type="text" name="year_of_manufacturing" class="form-control"
+                                                    required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Engine size</label>
+                                                <input type="text" name="engine_size" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Insurance date</label>
+                                                <input type="text" name="insurance_date" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Location</label>
+                                                <input type="text" name="location" class="form-control" required>
+                                            </div>
+
+
+
+
+
+                                            <div class="form-group">
+                                                <label>Model</label>
+                                                <input type="text" name="model" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Year</label>
+                                                <input type="number" name="year" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Color</label>
+                                                <input type="text" name="color" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Variant</label>
+                                                <input type="text" name="variant" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Kms</label>
+                                                <input type="number" name="kms" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Ownership</label>
+                                                <input type="number" name="ownership" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Transmission</label>
+                                                <input type="text" name="transmission" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Price</label>
+                                                <input type="number" name="price" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Car Type</label>
+                                                <select name="car_type" id="carType" class="form-control" requried>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Fuel Type</label>
+                                                <select name="fuel_type" id="fuelType" class="form-control" required>
+                                                </select>
+                                            </div>
+
+
+
+                                            <div class="form-group">
+                                                <label>Banner image</label>
+                                                <input type="file" name="bannerimage" accept="image/*" required>
+                                                <a href="https://www.remove.bg/upload" target="blank">
+                                                    <p><strong>Click here to remove background<strong></p>
+                                                </a>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Images</label>
+                                                <div id="imageInputsContainer">
+                                                    <input type="file" name="images[]"
+                                                        class="form-control-file image-input" accept="image/*" required>
+                                                </div>
+                                                <button type="button" id="addImageInput"
+                                                    class="btn btn-primary mt-2">Add Another Image</button>
+                                            </div>
+                                            <div id="imagePreview"></div>
+
+
+                                            <div class="form-group">
+                                                <label>RegNo</label>
+                                                <input type="text" name="regno" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Status</label>
+                                                <input type="text" name="status" class="form-control" required>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <input type="button" class="btn btn-default" data-dismiss="modal"
+                                                value="Cancel">
+                                            <input type="submit" class="btn btn-success" value="Add">
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
-											
-					</div>
-                </div>
-            </div>
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-						
-                        <th>Brand</th>
-                        <th>Car type</th>
-                        <th>Fuel </th>
-						<th>Model</th>
-                        <th>Year</th>
-                        <th>Color</th>
-                        <th>Variant</th>
-                        <th>Kms</th>
-                        <th>Ownership</th>
-                        <th>Transmission</th>
-                        <th>Price</th>
-                        <th>BannerImage</th>
-                        <th>Image</th>    
-                            <th>RegNo</th>
-                            <th>Status</th>
-                            <th>Engine size</th>
-                            <th>ManuFacturing Year</th>
-                            <th>Insurance date</th>
-                            <th>Location</th>
-                    </tr>
-                </thead>
-                <tbody>
-            {{range .Cars}}
-                    <tr>
-						
-                        <td>{{.Brand}}</td>
-                        <td>{{.CarType}}</td>
-                        <td>{{.FuelType}}</td>
-                        <td>{{.Model}}</td>
-						<td>{{.Year}}</td>
-                        <td>{{.Color}}</td>
-                        <td>{{.Variant}}</td>
-                        <td>{{.Kms}}</td>
-                        <td>{{.Ownership}}</td>
-                        <td>{{.Transmission}}</td>
-                        <td>{{.Price}}</td>
-                        <td> <img src="{{.Bannerimage}}" alt="jack" class="square-image" style="width: 50px; height: auto;"></td>
-                        <td>
-                            <div class="image-field">
-                                {{with index .Images 0}}
-                <img src="{{.Path}}" alt="Car Image" class="square-image" style="width: 50px; height: auto;">
-                {{end}}
-                            </div>
-                        </td>
-                        </div>
-                        </td>
-                        <td>{{.RegNo}}</td>
-                        <td>{{.Status}}</td>
-                        <td>{{.Engine_size}}</td>
-                        <td>{{.Year_of_manufacturing}}</td>
-                        <td>{{.Insurance_date}}</td>
-                        <td>{{.Location}}</td>
-                        <td>
-                            <a href="#editCarModal-{{.ID}}" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
-                            <a href="#deleteCarModal-{{.ID}}" class="delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>
-                        </td>
-                    </tr>
-                   {{end}}
-                </tbody>
-            </table>
-            <div class="clearfix">
-                <div class="hint-text">Showing <b>{{len .Cars}}</b> out of <b>{{.TotalCount}}</b> entries</div>
-                <ul class="pagination">
-                    <li class="page-item {{if eq .Page 1}}disabled{{end}}">
-                        <a href="?page=1&limit={{.Limit}}" class="page-link">Previous</a>
-                    </li>
-                    {{range $i, $page := .Pages}}
-                    <li class="page-item {{if eq $.Page $page}}active{{end}}">
-                        <a href="?page={{$page}}&limit={{$.Limit}}" class="page-link">{{$page}}</a>
-                    </li>
-                    {{end}}
-                    <li class="page-item {{if eq .Page .TotalPages}}disabled{{end}}">
-                        <a href="?page={{.TotalPages}}&limit={{.Limit}}" class="page-link">Next</a>
-                    </li>
-                </ul>
-            </div>
-            
-			
-			
-        </div>
-    </div>
-	<!-- Add Modal HTML -->
-    <div id="addCarModal" class="modal fade">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form action="/admin/cars/add" method="post" enctype="multipart/form-data">
-                    <div class="modal-header">                        
-                        <h4 class="modal-title">Add Car</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    </div>
-                    <div class="modal-body">                    
-                        <div class="form-group">
-                            <label>Brand</label>
-                            <input type="text" name="brand" class="form-control" required>
-                        </div>
+                        {{range .Cars}}
+                        <div id="editCarModal-{{.ID}}" class="modal fade">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form id="editForm-{{.ID}}" action="/admin/cars/edit/{{.ID}}" method="post"
+                                        enctype="multipart/form-data">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title">Edit Car</h4>
+                                            <button type="button" class="close" data-dismiss="modal"
+                                                aria-hidden="true">&times;</button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                <label>Brand</label>
+                                                <input type="text" name="brand" value="{{.Brand}}" class="form-control"
+                                                    required>
+                                            </div>
 
-                        <div class="form-group">
-                            <label>Year of manufacturing</label>
-                            <input type="text" name="year_of_manufacturing" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Engine size</label>
-                            <input type="text" name="engine_size" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Insurance date</label>
-                            <input type="text" name="insurance_date" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Location</label>
-                            <input type="text" name="location" class="form-control" required>
-                        </div>
+                                            <div class="form-group">
+                                                <label>Year of manufacturing</label>
+                                                <input type="text" name="year_of_manufacturing"
+                                                    value="{{.Year_of_manufacturing}}" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Engine size</label>
+                                                <input type="text" name="engine_size" value="{{.Engine_size}}"
+                                                    class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Insurance date</label>
+                                                <input type="text" name="insurance_date" value="{{.Insurance_date}}"
+                                                    class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Location</label>
+                                                <input type="text" name="location" value="{{.Location}}"
+                                                    class="form-control" required>
+                                            </div>
 
-
-
-
-
-                        <div class="form-group">
-                            <label>Model</label>
-                            <input type="text" name="model" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Year</label>
-                            <input type="number" name="year" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Color</label>
-                            <input type="text" name="color" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Variant</label>
-                            <input type="text" name="variant" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Kms</label>
-                            <input type="number" name="kms" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Ownership</label>
-                            <input type="text" placeholder="eg:1,2" name="ownership" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Transmission</label>
-                            <input type="number" name="transmission" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Price</label>
-                            <input type="number" name="price" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Car Type</label>
-                         <select name="car_type" id="carType" class="form-control" requried>
-                         </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Fuel Type</label>
-                         <select name="fuel_type" id="fuelType" class="form-control" required>
-                         </select>
-                        </div>
-
-
-                        
-                        <div class="form-group">
-                            <label>Banner image</label>
-                            <input type="file" name="bannerimage"   accept="image/*" required>
-                            <a href="https://www.remove.bg/upload" target="blank"><p><strong>Click here to remove background<strong></p></a>
-                       
-                        </div>
-                        <div class="form-group">
-                            <label>Images</label>
-                            <div id="imageInputsContainer">
-                                <input type="file" name="images[]" class="form-control-file image-input" accept="image/*" required>
-                            </div>
-                            <button type="button" id="addImageInput" class="btn btn-primary mt-2">Add Another Image</button>
-                        </div>
-                        <div id="imagePreview"></div>
-                    
-                       
-                        <div class="form-group">
-                            <label>RegNo</label>
-                            <input type="text" name="regno" class="form-control" required>
-                        </div>        
-                        <div class="form-group">
-                            <label>Status</label>
-                            <input type="text" name="status" class="form-control" required>
-                        </div>                                
-                    </div>
-                    <div class="modal-footer">
-                        <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
-                        <input type="submit" class="btn btn-success" value="Add">
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    {{range .Cars}}
-    <div id="editCarModal-{{.ID}}" class="modal fade">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form id="editForm-{{.ID}}" action="/admin/cars/edit/{{.ID}}" method="post" enctype="multipart/form-data">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Edit Car</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label>Brand</label>
-                            <input type="text" name="brand" value="{{.Brand}}" class="form-control" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Year of manufacturing</label>
-                            <input type="text" name="year_of_manufacturing" value="{{.Year_of_manufacturing}}" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Engine size</label>
-                            <input type="text" name="engine_size" value="{{.Engine_size}}" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Insurance date</label>
-                            <input type="text" name="insurance_date" value="{{.Insurance_date}}"  class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Location</label>
-                            <input type="text" name="location" value="{{.Location}}" class="form-control" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Model</label>
-                            <input type="text" name="model" value="{{.Model}}" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Year</label>
-                            <input type="text" name="year" class="form-control" value="{{.Year}}" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Color</label>
-                            <input type="text" name="color" value="{{.Color}}" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Variant</label>
-                            <input type="text" name="variant" value="{{.Variant}}" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Kms</label>
-                            <input type="text" name="kms" value="{{.Kms}}" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Car Type</label>
-                            <select name="car_type" class="form-control" required>
-                                <option value="{{.CarType}}" selected>{{.CarType}}</option>
-                                {{range $.CarTypes}}
-                                {{if ne . $.CarType}}
-                                <option value="{{.}}">{{.}}</option>
-                                {{end}}
-                                {{end}}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Fuel Type</label>
-                            <select name="fuel_type" class="form-control" required>
-                                <option value="{{.FuelType}}" selected>{{.FuelType}}</option>
-                                {{range $.FuelTypes}}
-                                {{if ne . $.FuelType}}
-                                <option value="{{.}}">{{.}}</option>
-                                {{end}}
-                                {{end}}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Ownership</label>
-                            <input type="text" name="ownership" value="{{.Ownership}}" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Transmission</label>
-                            <input type="text" name="transmission" value="{{.Transmission}}" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Price</label>
-                            <input type="text" name="price" value="{{.Price}}" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Banner Image</label>
-                            <img src="{{.Bannerimage}}" alt="Existing Banner Image" style="width: 100px; height: auto;">
-                            <a href="https://www.remove.bg/upload" target="blank"><p><strong>Click here to remove background<strong></p></a>
-                            <input type="file" name="bannerimage" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label>Images</label>
-                            <div id="existingImages">
-                                {{range .Images}}
-                                <img src="{{.Path}}" class="existing-image" alt="Existing Image" style="width: 100px; height: auto;">
-                                <input type="hidden" name="existing_images[]" value="{{.Path}}">
-                                {{end}}
+                                            <div class="form-group">
+                                                <label>Model</label>
+                                                <input type="text" name="model" value="{{.Model}}" class="form-control"
+                                                    required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Year</label>
+                                                <input type="text" name="year" class="form-control" value="{{.Year}}"
+                                                    required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Color</label>
+                                                <input type="text" name="color" value="{{.Color}}" class="form-control"
+                                                    required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Variant</label>
+                                                <input type="text" name="variant" value="{{.Variant}}"
+                                                    class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Kms</label>
+                                                <input type="text" name="kms" value="{{.Kms}}" class="form-control"
+                                                    required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Car Type</label>
+                                                <select name="car_type" class="form-control" required>
+                                                    <option value="{{.CarType}}" selected>{{.CarType}}</option>
+                                                    {{range $.CarTypes}}
+                                                    {{if ne . $.CarType}}
+                                                    <option value="{{.}}">{{.}}</option>
+                                                    {{end}}
+                                                    {{end}}
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Fuel Type</label>
+                                                <select name="fuel_type" class="form-control" required>
+                                                    <option value="{{.FuelType}}" selected>{{.FuelType}}</option>
+                                                    {{range $.FuelTypes}}
+                                                    {{if ne . $.FuelType}}
+                                                    <option value="{{.}}">{{.}}</option>
+                                                    {{end}}
+                                                    {{end}}
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Ownership</label>
+                                                <input type="text" name="ownership" value="{{.Ownership}}"
+                                                    class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Transmission</label>
+                                                <input type="text" name="transmission" value="{{.Transmission}}"
+                                                    class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Price</label>
+                                                <input type="text" name="price" value="{{.Price}}" class="form-control"
+                                                    required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Banner Image</label>
+                                                <img src="{{.Bannerimage}}" alt="Existing Banner Image"
+                                                    style="width: 100px; height: auto;">
+                                                <a href="https://www.remove.bg/upload" target="blank">
+                                                    <p><strong>Click here to remove background<strong></p>
+                                                </a>
+                                                <input type="file" name="bannerimage" class="form-control">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Images</label>
+                                                <div id="existingImages">
+                                                    {{range .Images}}
+                                                    <img src="{{.Path}}" class="existing-image" alt="Existing Image"
+                                                        style="width: 100px; height: auto;">
+                                                    <input type="hidden" name="existing_images[]" value="{{.Path}}">
+                                                    {{end}}
+                                                </div>
+                                            </div>
+                                            <div id="imagePreview-{{.ID}}" class="image-preview"></div>
+                                            <div class="form-group">
+                                                <label>RegNo</label>
+                                                <input type="text" name="regno" class="form-control" value="{{.RegNo}}"
+                                                    required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Status</label>
+                                                <input type="text" name="status" class="form-control"
+                                                    value="{{.Status}}" required>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <input type="button" class="btn btn-default" data-dismiss="modal"
+                                                value="Cancel">
+                                            <input type="submit" class="btn btn-info" value="Save">
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
-                        <div id="imagePreview-{{.ID}}" class="image-preview"></div>
-                        <div class="form-group">
-                            <label>RegNo</label>
-                            <input type="text" name="regno" class="form-control" value="{{.RegNo}}" required>
+                        {{end}}
+
+
+                        {{range .Cars}}
+                        <!-- Delete Modal HTML -->
+                        <div id="deleteCarModal-{{.ID}}" class="modal fade">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form id="deleteForm-{{.ID}}" action="/admin/cars/delete/{{.ID}}" method="post"
+                                        enctype="multipart/form-data">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title">Delete Car</h4>
+                                            <button type="button" class="close" data-dismiss="modal"
+                                                aria-hidden="true">&times;</button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to delete these Records-<b>{{.Brand}}</b></p>
+                                            <p class="text-warning"><small>This action cannot be undone.</small></p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <input type="button" class="btn btn-default" data-dismiss="modal"
+                                                value="Cancel">
+                                            <input type="submit" class="btn btn-danger" value="Delete">
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Status</label>
-                            <input type="text" name="status" class="form-control" value="{{.Status}}" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
-                        <input type="submit" class="btn btn-info" value="Save">
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    {{end}}
+                        {{end}}
 
 
-   {{range .Cars}}
-	<!-- Delete Modal HTML -->
-	<div id="deleteCarModal-{{.ID}}" class="modal fade">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<form id="deleteForm-{{.ID}}" action="/admin/cars/delete/{{.ID}}" method="post" enctype="multipart/form-data">
-					<div class="modal-header">						
-						<h4 class="modal-title">Delete Car</h4>
-						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					</div>
-					<div class="modal-body">					
-						<p>Are you sure you want to delete these Records-<b>{{.Brand}}</b></p>
-						<p class="text-warning"><small>This action cannot be undone.</small></p>
-					</div>
-					<div class="modal-footer">
-						<input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
-						<input type="submit" class="btn btn-danger" value="Delete">
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
-    {{end}} 
-
-                       
                     </div>
 
                 </div>
@@ -590,7 +599,7 @@
             <!-- End of Main Content -->
 
             <!-- Footer -->
-          
+
             <!-- End of Footer -->
 
         </div>
@@ -600,50 +609,35 @@
     <!-- End of Page Wrapper -->
 
     <!-- Scroll to Top Button-->
-    <a class="scroll-to-top rounded" href="#page-top">
+    <!-- <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
-    </a>
+    </a> -->
 
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="login.html">Logout</a>
-                </div>
-            </div>
-        </div>
-    </div>
+
+
+
+
     <script src="/static/js/almas.js"></script>
     <script src="/static/vendor/jquery/jquery.min.js"></script>
     <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
- 
+
     <script src="/static/vendor/jquery-easing/jquery.easing.min.js"></script>
 
-   
+
     <script src="/static/js/sb-admin-2.min.js"></script>
 
-  
+
     <script src="/static/vendor/chart.js/Chart.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 
 
-   
+
     <script src="/static/js/demo/chart-area-demo.js"></script>
     <script src="/static/js/demo/chart-pie-demo.js"></script>
-    
+
 
 </body>
 
