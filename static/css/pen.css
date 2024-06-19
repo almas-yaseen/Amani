@@ -1,0 +1,11 @@
+.square-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+#imagePreview {
+    display: flex;
+    flex-wrap: wrap;
+}

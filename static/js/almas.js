@@ -98,14 +98,3 @@
                     .catch(error => console.error("Error fetching PDF:", error));
             });
         });
-        document.getElementById('addAnotherlink').addEventListener('click', function() {
-            var container = document.getElementById('Youtubelinkcontainer');
-            var newInput = document.createElement('input');
-            newInput.type = 'url';
-            newInput.name = 'links[]'; // Ensure name ends with []
-            newInput.className = 'form-control mt-2';
-            newInput.required = true;
-            container.appendChild(newInput);
-        });
-   
- 
