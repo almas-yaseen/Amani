@@ -455,7 +455,9 @@ func GetChoices(c *gin.Context) {
 func Get_Stock_Car_All_unit(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Set CORS headers
-		c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
+		// Set CORS headers
+		allowedOrigins := "http://localhost:5173, https://amani-motors.vercel.app"
+		c.Header("Access-Control-Allow-Origin", allowedOrigins)
 		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
 		c.Header("Access-Control-Allow-Credentials", "true")
@@ -587,11 +589,12 @@ func Get_Pdf_Report(db *gorm.DB) gin.HandlerFunc {
 func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Set CORS headers
-		c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
+		// Set CORS headers
+		allowedOrigins := "http://localhost:5173, https://amani-motors.vercel.app"
+		c.Header("Access-Control-Allow-Origin", allowedOrigins)
 		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
 		c.Header("Access-Control-Allow-Credentials", "true")
-
 		var cars []domain.Car
 
 		if err := db.Order("id desc").Limit(5).Find(&cars).Error; err != nil {
@@ -637,7 +640,9 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 func GetAllVehicles(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Set CORS headers
-		c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
+		// Set CORS headers
+		allowedOrigins := "http://localhost:5173, https://amani-motors.vercel.app"
+		c.Header("Access-Control-Allow-Origin", allowedOrigins)
 		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
 		c.Header("Access-Control-Allow-Credentials", "true")
