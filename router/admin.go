@@ -3,31 +3,30 @@ package routes
 import (
 	"ginapp/handlers"
 	"ginapp/middleware"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func setCORSHeaders() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "https://www.amanimotors.in")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		c.Header("Access-Control-Allow-Credentials", "true")
+// func setCORSHeaders() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		c.Writer.Header().Set("Access-Control-Allow-Origin", "https://www.amanimotors.in")
+// 		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+// 		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+// 		c.Header("Access-Control-Allow-Credentials", "true")
 
-		// Allow OPTIONS method for preflight requests
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(http.StatusNoContent)
-			return
-		}
+// 		// Allow OPTIONS method for preflight requests
+// 		if c.Request.Method == "OPTIONS" {
+// 			c.AbortWithStatus(http.StatusNoContent)
+// 			return
+// 		}
 
-		c.Next()
-	}
-}
+// 		c.Next()
+// 	}
+// }
 
 func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
-	r.Use(setCORSHeaders())
+	// r.Use(setCORSHeaders())
 
 	myapp := r.Group("/myapp")
 

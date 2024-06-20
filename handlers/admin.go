@@ -455,12 +455,12 @@ func Get_Stock_Car_All_unit(db *gorm.DB) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		// Set CORS headers
-		// Set CORS headers
-		allowedOrigins := " https://www.amanimotors.in"
-		c.Header("Access-Control-Allow-Origin", allowedOrigins)
-		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
-		c.Header("Access-Control-Allow-Credentials", "true")
+		// // Set CORS headers
+		// allowedOrigins := " https://www.amanimotors.in"
+		// c.Header("Access-Control-Allow-Origin", allowedOrigins)
+		// c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		// c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
+		// c.Header("Access-Control-Allow-Credentials", "true")
 
 		var cars []domain.Car
 		var totalcount int64
@@ -587,7 +587,7 @@ func Get_Pdf_Report(db *gorm.DB) gin.HandlerFunc {
 // Register the route
 func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "https://www.amanimotors.in")
+		// c.Writer.Header().Set("Access-Control-Allow-Origin", "https://www.amanimotors.in")
 
 		// Fetch the latest 5 cars
 		var cars []domain.Car
