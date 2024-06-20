@@ -6,9 +6,26 @@ import (
 	"ginapp/database"
 	routes "ginapp/router"
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "https://www.amanimotors.in")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, X-CSRF-Token, Authorization")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusOK)
+			return
+		}
+
+		c.Next()
+	}
+}
 
 func main() {
 	cfg, err := config.LoadConfig()
@@ -25,6 +42,7 @@ func main() {
 	log.Println("Database connection successful!")
 
 	router := gin.Default()
+	router.Use(CORSMiddleware())
 
 	router.LoadHTMLGlob("templates/*")
 	router.Static("/static", "./static")
