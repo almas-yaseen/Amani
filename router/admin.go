@@ -11,7 +11,7 @@ import (
 
 func setCORSHeaders() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "https://www.amanimotors.in")
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		c.Header("Access-Control-Allow-Credentials", "true")
