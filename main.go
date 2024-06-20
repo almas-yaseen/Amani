@@ -6,9 +6,7 @@ import (
 	"ginapp/database"
 	routes "ginapp/router"
 	"log"
-	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,17 +25,6 @@ func main() {
 	log.Println("Database connection successful!")
 
 	router := gin.Default()
-	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"PUT", "PATCH", "POST", "GET"},
-		AllowHeaders:     []string{"Origin"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		AllowOriginFunc: func(origin string) bool {
-			return origin == "https://www.amanimotors.in"
-		},
-		MaxAge: 12 * time.Hour,
-	}))
 
 	router.LoadHTMLGlob("templates/*")
 	router.Static("/static", "./static")

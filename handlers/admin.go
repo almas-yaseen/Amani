@@ -587,9 +587,14 @@ func Get_Pdf_Report(db *gorm.DB) gin.HandlerFunc {
 // Register the route
 func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// c.Writer.Header().Set("Access-Control-Allow-Origin", "https://www.amanimotors.in")
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "https://www.amanimotors.in")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusOK)
+			return
+		}
 
-		// Fetch the latest 5 cars
 		var cars []domain.Car
 
 		if err := db.Order("id desc").Limit(5).Find(&cars).Error; err != nil {
