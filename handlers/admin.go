@@ -606,23 +606,20 @@ func Get_Pdf_Report(db *gorm.DB) gin.HandlerFunc {
 
 // Register the route
 func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
-
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "https://www.amanimotors.in")
 
 		// Fetch the latest 5 cars
 		var cars []domain.Car
+
 		if err := db.Order("id desc").Limit(5).Find(&cars).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch the database"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch tha database"})
 			return
+
 		}
 
 		// Create a structure to hold the response data
 		type CarDetail struct {
-			ID          uint   `json:"id"`
-			CarType     string `json:"car_type"`
-			Brand       string `json:"brand"`
-			Year        int    `json:"year"`
 			BannerImage string `json:"bannerImage"`
 			Model       string `json:"model"`
 			Variant     string `json:"variant"`
@@ -634,10 +631,6 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 
 		for _, car := range cars {
 			carDetail := CarDetail{
-				ID:          car.ID,
-				CarType:     car.CarType,
-				Brand:       car.Brand,
-				Year:        car.Year,
 				BannerImage: car.Bannerimage,
 				Model:       car.Model,
 				Variant:     car.Variant,
