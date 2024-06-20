@@ -7,7 +7,6 @@ import (
 	routes "ginapp/router"
 	"log"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,16 +25,6 @@ func main() {
 	log.Println("Database connection successful!")
 
 	router := gin.Default()
-
-	// Custom CORS configuration
-	corsConfig := cors.Config{
-		AllowOrigins:     []string{"https://amanimotors.in"}, // Allow your React frontend
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		AllowCredentials: true,
-	}
-
-	router.Use(cors.New(corsConfig))
 
 	router.LoadHTMLGlob("templates/*")
 	router.Static("/static", "./static")
