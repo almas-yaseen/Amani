@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"ginapp/domain"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -18,6 +19,7 @@ import (
 
 func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+
 		var cars []domain.Car
 
 		var count int64
@@ -113,42 +115,6 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
-func GetFilterTypes(db *gorm.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var filterTypes struct {
-			Brands    []string `json:"brands"`
-			CarTypes  []string `json:"car_types"`
-			FuelTypes []string `json:"fuel_types"`
-		}
-
-		// Fetch distinct brands
-		var brands []string
-		if err := db.Model(&domain.Car{}).Distinct("brand").Pluck("brand", &brands).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch brands"})
-			return
-		}
-		filterTypes.Brands = brands
-
-		// Use predefined car types and fuel types
-		filterTypes.CarTypes = []string{
-			domain.CarTypeSedan,
-			domain.CarTypeHatchback,
-			domain.CarTypeSuv,
-			domain.CarTypeBike,
-		}
-		filterTypes.FuelTypes = []string{
-			domain.FuelTypePetrol,
-			domain.FuelTypeCNG,
-			domain.FuelTypeDiesel,
-			domain.FuelTypeElectric,
-
-			// Add other fuel types here
-		}
-
-		c.JSON(http.StatusOK, filterTypes)
-	}
-}
-
 // Youtube_link handles POST requests to add multiple YouTube links
 func Adding_Youtube_Link(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -183,6 +149,40 @@ func Adding_Youtube_Link(db *gorm.DB) gin.HandlerFunc {
 
 		// Respond with success message
 		c.Redirect(http.StatusSeeOther, "/admin/get_youtube_link_form")
+	}
+}
+func GetFilterTypes(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		var filterTypes struct {
+			Brands    []string `json:"brands"`
+			CarTypes  []string `json:"car_types"`
+			FuelTypes []string `json:"fuel_types"`
+		}
+
+		// Fetch distinct brands
+		var brands []string
+		if err := db.Model(&domain.Car{}).Distinct("brand").Pluck("brand", &brands).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch brands"})
+			return
+		}
+		filterTypes.Brands = brands
+
+		// Use predefined car types and fuel types
+		filterTypes.CarTypes = []string{
+			domain.CarTypeSedan,
+			domain.CarTypeHatchback,
+			domain.CarTypeSuv,
+			domain.CarTypeBike,
+		}
+		filterTypes.FuelTypes = []string{
+			domain.FuelTypePetrol,
+			domain.FuelTypeCNG,
+			domain.FuelTypeDiesel,
+			domain.FuelTypeElectric,
+		}
+
+		c.JSON(http.StatusOK, filterTypes)
 	}
 }
 
@@ -233,15 +233,51 @@ func Youtube_page_edit(db *gorm.DB) gin.HandlerFunc {
 
 func Show_Youtube_Page(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		var (
+			links      []domain.YoutubeLink
+			totalCount int64
+			page       int
+			limit      int
+			offset     int
+		)
 
-		var links []domain.YoutubeLink
+		// Parse query parameters for pagination
+		page, _ = strconv.Atoi(c.DefaultQuery("page", "1"))
+		if page < 1 {
+			page = 1
+		}
+		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "5")) // Default limit to 2 if not provided
 
-		if err := db.Find(&links).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed"})
+		// Calculate offset
+		offset = (page - 1) * limit
+
+		// Fetch total count of entries
+		// Fetch total count of entries
+		if err := db.Model(&domain.YoutubeLink{}).Count(&totalCount).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count entries"})
 			return
 		}
-		c.HTML(http.StatusOK, "show.html", gin.H{"links": links})
+		// Fetch links with pagination
+		if err := db.Limit(limit).Offset(offset).Find(&links).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch links"})
+			return
+		}
 
+		// Generate pagination links
+		totalPages := int(math.Ceil(float64(totalCount) / float64(limit)))
+		pages := make([]int, totalPages)
+		for i := range pages {
+			pages[i] = i + 1
+		}
+
+		c.HTML(http.StatusOK, "show.html", gin.H{
+			"links":      links,
+			"TotalCount": totalCount,
+			"Page":       page,
+			"Limit":      limit,
+			"TotalPages": totalPages,
+			"Pages":      pages,
+		})
 	}
 }
 
@@ -304,7 +340,12 @@ func Logout(c *gin.Context) {
 }
 
 func AdminLogin(c *gin.Context) {
-	fmt.Println("akdbkabkhjasbhkjbasdkjhkjhadbhkdsc")
+	if cookie, err := c.Cookie("authenticated"); err == nil && cookie == "true" {
+		// User is authenticated, redirect to the dashboard
+		c.Redirect(http.StatusFound, "/admin")
+		return
+	}
+
 	if c.Request.Method == http.MethodPost {
 		username := c.PostForm("username")
 		fmt.Println("here is the username and asdasd", username)
@@ -312,7 +353,7 @@ func AdminLogin(c *gin.Context) {
 		fmt.Println("here is the username", username)
 
 		if username == "amani" && password == "amani123" {
-			c.SetCookie("authenticated", "true", 3600, "/", "", false, true)
+			c.SetCookie("authenticated", "true", 36000, "/", "", false, true)
 			c.Redirect(http.StatusFound, "/admin")
 			return
 
@@ -323,30 +364,48 @@ func AdminLogin(c *gin.Context) {
 	c.HTML(http.StatusOK, "login.html", nil)
 
 }
-
 func Dashboard(db *gorm.DB) gin.HandlerFunc {
-	fmt.Println("here is the dashboard")
 	return func(c *gin.Context) {
-		var cars []domain.Car
+		var (
+			cars       []domain.Car
+			totalCount int64
+			page       int
+			limit      int
+			offset     int
+		)
 
-		if err := db.Find(&cars).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch the database"})
+		// Parse query parameters for pagination
+		page, _ = strconv.Atoi(c.DefaultQuery("page", "1"))
+		if page < 1 {
+			page = 1
+		}
+		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "5")) // Default limit to 2 if not provided
+
+		// Calculate offset
+		offset = (page - 1) * limit
+
+		// Fetch cars with pagination
+		if err := db.Limit(limit).Offset(offset).Find(&cars).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch cars"})
 			return
 		}
 
-		// Fetch associated images for each car
-		for i, car := range cars {
-			var images []domain.Image
-			if err := db.Where("car_id = ?", car.ID).Find(&images).Error; err != nil {
+		// Fetch total count of cars (for pagination)
+		if err := db.Model(&domain.Car{}).Count(&totalCount).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch total count"})
+			return
+		}
+
+		// Fetch associated images for each car (if Image is a related entity)
+		for i := range cars {
+			if err := db.Model(&cars[i]).Association("Images").Find(&cars[i].Images); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch images"})
 				return
 			}
-			cars[i].Images = images
 
 			// Fetch the existing CarType and FuelType for the car
-			// Assuming you have stored CarType and FuelType in the database along with Car entity
 			var existingCar domain.Car
-			if err := db.Where("id = ?", car.ID).First(&existingCar).Error; err != nil {
+			if err := db.Where("id = ?", cars[i].ID).First(&existingCar).Error; err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch existing car details"})
 				return
 			}
@@ -354,37 +413,25 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 			cars[i].FuelType = existingCar.FuelType
 		}
 
-		// Now, fetch all images for all cars
-		var allImages []domain.Image
-		if err := db.Find(&allImages).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch all images"})
-			return
+		// Generate pagination links
+		totalPages := int(math.Ceil(float64(totalCount) / float64(limit)))
+		pages := make([]int, totalPages)
+		for i := range pages {
+			pages[i] = i + 1
 		}
 
-		// Define your car types and fuel types
-		carTypes := []string{
-			domain.CarTypeSedan,
-			domain.CarTypeHatchback,
-			domain.CarTypeSuv,
-			domain.CarTypeBike,
-		}
-
-		fuelTypes := []string{
-			domain.FuelTypePetrol,
-			domain.FuelTypeDiesel,
-			domain.FuelTypeCNG,
-			domain.FuelTypeElectric,
-		}
-
-		// Pass both cars, images, carTypes, and fuelTypes to the HTML template
+		// Pass cars, pagination info, and other necessary data to the HTML template
 		c.HTML(http.StatusOK, "admin.html", gin.H{
-			"Cars":      cars,
-			"Images":    allImages,
-			"CarTypes":  carTypes,
-			"FuelTypes": fuelTypes,
+			"Cars":       cars,
+			"TotalCount": totalCount,
+			"Page":       page,
+			"Limit":      limit,
+			"TotalPages": totalPages,
+			"Pages":      pages,
 		})
 	}
 }
+
 func GetChoices(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
@@ -405,12 +452,15 @@ func GetChoices(c *gin.Context) {
 }
 
 func Get_Stock_Car_All_unit(db *gorm.DB) gin.HandlerFunc {
+
 	return func(c *gin.Context) {
 		// Set CORS headers
-		c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
-		c.Header("Access-Control-Allow-Credentials", "true")
+		// // Set CORS headers
+		// allowedOrigins := " https://www.amanimotors.in"
+		// c.Header("Access-Control-Allow-Origin", allowedOrigins)
+		// c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		// c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
+		// c.Header("Access-Control-Allow-Credentials", "true")
 
 		var cars []domain.Car
 		var totalcount int64
@@ -535,14 +585,8 @@ func Get_Pdf_Report(db *gorm.DB) gin.HandlerFunc {
 }
 
 // Register the route
-
 func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Set CORS headers
-		c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
-		c.Header("Access-Control-Allow-Credentials", "true")
 
 		var cars []domain.Car
 
@@ -554,10 +598,6 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 
 		// Create a structure to hold the response data
 		type CarDetail struct {
-			ID          uint   `json:"id"`
-			Car_type    string `json:"car_type"`
-			Brand       string `json:"brand"`
-			Year        int    `json:"year"`
 			BannerImage string `json:"bannerImage"`
 			Model       string `json:"model"`
 			Variant     string `json:"variant"`
@@ -569,10 +609,6 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 
 		for _, car := range cars {
 			carDetail := CarDetail{
-				ID:          car.ID,
-				Year:        car.Year,
-				Brand:       car.Brand,
-				Car_type:    car.CarType,
 				BannerImage: car.Bannerimage,
 				Model:       car.Model,
 				Variant:     car.Variant,
@@ -588,15 +624,10 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 }
 func GetAllVehicles(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Set CORS headers
-		c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
-		c.Header("Access-Control-Allow-Credentials", "true")
 
 		var cars []domain.Car
 
-		if err := db.Order("id desc").Limit(6).Preload("Images").Find(&cars).Error; err != nil { //
+		if err := db.Order("id desc").Limit(6).Preload("Images").Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch the cars"})
 			return
 		}
@@ -674,9 +705,6 @@ func AddCar(db *gorm.DB) gin.HandlerFunc {
 		car.CarType = c.PostForm("car_type")
 		fmt.Println("here is the car type", car.CarType)
 		car.FuelType = c.PostForm("fuel_type")
-		car.Year_of_manufacturing = c.PostForm("year_of_manufacturing") //new
-
-		fmt.Println("here is the manu", car.Year_of_manufacturing)
 		car.Engine_size = c.PostForm("engine_size")       //new
 		car.Insurance_date = c.PostForm("insurance_date") //new
 		car.Location = c.PostForm("location")             //new
@@ -745,9 +773,9 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 		car.Year = year
 		car.CarType = c.PostForm("car_type")
 		car.FuelType = c.PostForm("fuel_type")
-		car.Year_of_manufacturing = c.PostForm("year_of_manufacturing") //new
-		car.Engine_size = c.PostForm("engine_size")                     //new
-		car.Insurance_date = c.PostForm("insurance_date")               //new
+
+		car.Engine_size = c.PostForm("engine_size")       //new
+		car.Insurance_date = c.PostForm("insurance_date") //new
 		car.Location = c.PostForm("location")
 		car.Color = c.PostForm("color")
 		car.Variant = c.PostForm("variant")

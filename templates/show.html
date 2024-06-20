@@ -39,7 +39,7 @@
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
       <!-- Sidebar - Brand -->
-      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/admin">
         <div class="sidebar-brand-icon rotate-n-15">
           <i class="fas fa-car"></i>
         </div>
@@ -195,7 +195,7 @@
                   <div class="form-group">
                     <label>Add link</label>
                     <div id="Youtubelinkcontainer">
-                      <input type="url" name="links[]" class="form-control" required />
+                      <input type="url" name="links[]" placeholder="Paste video link here." class="form-control" required />
                     </div>
                     <button type="button" id="addAnotherlink" class="btn btn-primary mt-2">
                       Add Another Link
@@ -237,7 +237,7 @@
                   {{ range $index, $link := .links }}
                   <tr>
                       <th scope="row">{{$index}}</th>
-                      <td>
+                      <td >
                           <a href="{{ $link.VideoLink }}" target="_blank">{{ $link.VideoLink }}</a>
                       </td>
                       <td>
@@ -289,17 +289,20 @@
               </tbody>
           </table>
           </div>
-
           <div class="clearfix">
-            <div class="hint-text">Showing <b>5</b> out of <b>25</b> entries</div>
+            <div class="hint-text">Showing <b>{{len .links}}</b> out of <b>{{.TotalCount}}</b> entries</div>
             <ul class="pagination">
-                <li class="page-item disabled"><a href="#">Previous</a></li>
-                <li class="page-item"><a href="#" class="page-link">1</a></li>
-                <li class="page-item"><a href="#" class="page-link">2</a></li>
-                <li class="page-item active"><a href="#" class="page-link">3</a></li>
-                <li class="page-item"><a href="#" class="page-link">4</a></li>
-                <li class="page-item"><a href="#" class="page-link">5</a></li>
-                <li class="page-item"><a href="#" class="page-link">Next</a></li>
+                <li class="page-item {{if eq .Page 1}}disabled{{end}}">
+                    <a href="?page=1&limit={{.Limit}}" class="page-link">Previous</a>
+                </li>
+                {{range $i, $page := .Pages}}
+                <li class="page-item {{if eq $.Page $page}}active{{end}}">
+                    <a href="?page={{$page}}&limit={{$.Limit}}" class="page-link">{{$page}}</a>
+                </li>
+                {{end}}
+                <li class="page-item {{if eq .Page .TotalPages}}disabled{{end}}">
+                    <a href="?page={{.TotalPages}}&limit={{.Limit}}" class="page-link">Next</a>
+                </li>
             </ul>
         </div>
         
