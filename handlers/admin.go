@@ -17,27 +17,9 @@ import (
 	"gorm.io/gorm"
 )
 
-func setCORSHeaders(c *gin.Context) {
-
-	c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-	c.Header("Access-Control-Allow-Credentials", "true")
-	c.Writer.Header().Set("Access-Control-Allow-Origin", "https://www.amanimotors.in")
-
-}
-
-func handleOptionsRequest(c *gin.Context) {
-	if c.Request.Method == "OPTIONS" {
-		c.AbortWithStatus(http.StatusOK)
-		return
-	}
-}
-
 func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		setCORSHeaders(c)
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "https://www.amanimotors.in")
-		handleOptionsRequest(c)
+
 		var cars []domain.Car
 
 		var count int64
@@ -171,8 +153,6 @@ func Adding_Youtube_Link(db *gorm.DB) gin.HandlerFunc {
 }
 func GetFilterTypes(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		setCORSHeaders(c)
-		handleOptionsRequest(c)
 
 		var filterTypes struct {
 			Brands    []string `json:"brands"`
@@ -646,8 +626,6 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 }
 func GetAllVehicles(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		setCORSHeaders(c)
-		handleOptionsRequest(c)
 
 		var cars []domain.Car
 
