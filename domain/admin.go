@@ -26,7 +26,7 @@ const (
 
 type Car struct {
 	ID             uint      `gorm:"primaryKey;autoIncrement" json:"id"`
-	Brand          string    `json:"brand"`
+	Brands         []Brand   `gorm:"many2many" json:"brands"`
 	Model          string    `json:"model"`
 	Year           int       `json:"year"`
 	Color          string    `json:"color"`
@@ -47,6 +47,11 @@ type Car struct {
 	Insurance_date string    `json:"insurance_dating"` //new ones
 	Location       string    `json:"location"`         //new ones
 }
+type Brand struct {
+	ID   uint   `gorm:"primaryKey;autoIncrement"json:"id"`
+	Name string `json:"name"`
+}
+
 type Image struct {
 	ID    uint   `gorm:"primaryKey;autoIncrement" json:"id"`
 	CarID uint   `json:"car_id"`

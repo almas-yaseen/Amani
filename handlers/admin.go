@@ -17,6 +17,56 @@ import (
 	"gorm.io/gorm"
 )
 
+func Get_Brand_Page(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			links      []domain.YoutubeLink
+			totalCount int64
+			page       int
+			limit      int
+			offset     int
+		)
+
+		// Parse query parameters for pagination
+		page, _ = strconv.Atoi(c.DefaultQuery("page", "1"))
+		if page < 1 {
+			page = 1
+		}
+		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "5")) // Default limit to 2 if not provided
+
+		// Calculate offset
+		offset = (page - 1) * limit
+
+		// Fetch total count of entries
+		// Fetch total count of entries
+		if err := db.Model(&domain.YoutubeLink{}).Count(&totalCount).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count entries"})
+			return
+		}
+		// Fetch links with pagination
+		if err := db.Order("created_at desc").Limit(limit).Offset(offset).Find(&links).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch links"})
+			return
+		}
+
+		// Generate pagination links
+		totalPages := int(math.Ceil(float64(totalCount) / float64(limit)))
+		pages := make([]int, totalPages)
+		for i := range pages {
+			pages[i] = i + 1
+		}
+
+		c.HTML(http.StatusOK, "brand.html", gin.H{
+			"links":      links,
+			"TotalCount": totalCount,
+			"Page":       page,
+			"Limit":      limit,
+			"TotalPages": totalPages,
+			"Pages":      pages,
+		})
+	}
+}
+
 func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
