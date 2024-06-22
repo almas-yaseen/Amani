@@ -599,6 +599,8 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 		// Create a structure to hold the response data
 		type CarDetail struct {
 			BannerImage string `json:"bannerImage"`
+			Brand       string `json:"brand"`
+			Id          int    `json:"id"`
 			Model       string `json:"model"`
 			Variant     string `json:"variant"`
 			Price       int    `json:"price"`
@@ -614,6 +616,8 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 				Variant:     car.Variant,
 				Price:       car.Price,
 				Color:       car.Color,
+				Brand:       car.Brand,
+				Id:          int(car.ID),
 			}
 			carDetails = append(carDetails, carDetail)
 			fmt.Println("Car details:", carDetail)
