@@ -103,6 +103,16 @@
                 </div>
             </a>
 
+            <a class="sidebar-brand d-flex align-items-center justify-content-around w-full" href="/admin/get_brand_page">
+                <div style="font-size: 1rem;" class=" font-weight-normal">
+                    <i class="fa fa-bold" aria-hidden="true"></i>
+
+                </div>
+                <div class="sidebar-brand-text font-weight-normal btn btn-sm btn-outline-light ">
+                    <small>Brands</small> <sup></sup>
+                </div>
+            </a>
+
 
 
             <br>
@@ -615,6 +625,48 @@
     <!-- <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a> -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    // Function to populate the dropdowns
+    function populateDropdowns(carTypes, fuelTypes) {
+        const carTypeSelect = document.getElementById('carType');
+        const fuelTypeSelect = document.getElementById('fuelType');
+
+        // Clear existing options
+        carTypeSelect.innerHTML = '';
+        fuelTypeSelect.innerHTML = '';
+
+        // Add options for car types
+        carTypes.forEach(carType => {
+            const option = document.createElement('option');
+            option.value = carType;
+            option.textContent = carType;
+            carTypeSelect.appendChild(option);
+        });
+
+        // Add options for fuel types
+        fuelTypes.forEach(fuelType => {
+            const option = document.createElement('option');
+            option.value = fuelType;
+            option.textContent = fuelType;
+            fuelTypeSelect.appendChild(option);
+        });
+    }
+
+    // Event listener for the modal shown event
+    $('#addCarModal').on('shown.bs.modal', function () {
+        fetch('/myapp/get_choices') // Replace with your actual endpoint URL
+            .then(response => response.json())
+            .then(data => {
+                const carTypes = data.car_types;
+                const fuelTypes = data.fuel_types;
+                populateDropdowns(carTypes, fuelTypes);
+            })
+            .catch(error => console.error('Error fetching choices:', error));
+    });
+});
+
+    </script>
 
 
 

@@ -20,7 +20,7 @@ import (
 func Get_Brand_Page(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			links      []domain.YoutubeLink
+			brands     []domain.Brand
 			totalCount int64
 			page       int
 			limit      int
@@ -39,12 +39,12 @@ func Get_Brand_Page(db *gorm.DB) gin.HandlerFunc {
 
 		// Fetch total count of entries
 		// Fetch total count of entries
-		if err := db.Model(&domain.YoutubeLink{}).Count(&totalCount).Error; err != nil {
+		if err := db.Model(&domain.Brand{}).Count(&totalCount).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count entries"})
 			return
 		}
 		// Fetch links with pagination
-		if err := db.Order("created_at desc").Limit(limit).Offset(offset).Find(&links).Error; err != nil {
+		if err := db.Order("created_at desc").Limit(limit).Offset(offset).Find(&brands).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch links"})
 			return
 		}
@@ -57,7 +57,7 @@ func Get_Brand_Page(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		c.HTML(http.StatusOK, "brand.html", gin.H{
-			"links":      links,
+			"brands":     brands,
 			"TotalCount": totalCount,
 			"Page":       page,
 			"Limit":      limit,
@@ -147,7 +147,7 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 			}
 			carWithImage := CarWithImage{
 				ID:           car.ID,
-				Brand:        car.Brand,
+				Brand:        car.Brand.Name,
 				Model:        car.Model,
 				Year:         car.Year,
 				Color:        car.Color,
@@ -418,6 +418,7 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			cars       []domain.Car
+			brand      []domain.Brand
 			totalCount int64
 			page       int
 			limit      int
@@ -443,6 +444,10 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 		// Fetch total count of cars (for pagination)
 		if err := db.Model(&domain.Car{}).Count(&totalCount).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch total count"})
+			return
+		}
+		if err := db.Find(&brand).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"wrong": "format"})
 			return
 		}
 
@@ -482,6 +487,7 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 			"Page":       page,
 			"Limit":      limit,
 			"TotalPages": totalPages,
+			"brands":     brand,
 			"Pages":      pages,
 			"CarTypes":   carTypes,
 			"FuelTypes":  fuelTypes,
@@ -559,7 +565,7 @@ func Get_Stock_Car_All_unit(db *gorm.DB) gin.HandlerFunc {
 			}
 			carWithImage := CarWithImage{
 				ID:        car.ID,
-				Brand:     car.Brand,
+				Brand:     car.Brand.Name,
 				Model:     car.Model,
 				Year:      car.Year,
 				Color:     car.Color,
@@ -674,7 +680,7 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 				Variant:     car.Variant,
 				Price:       car.Price,
 				Color:       car.Color,
-				Brand:       car.Brand,
+				Brand:       car.Brand.Name,
 				Year:        int(car.Year),
 				Id:          int(car.ID),
 			}
@@ -723,7 +729,7 @@ func GetAllVehicles(db *gorm.DB) gin.HandlerFunc {
 			}
 			carWithImage := CarWithImage{
 				ID:           car.ID,
-				Brand:        car.Brand,
+				Brand:        car.Brand.Name,
 				Model:        car.Model,
 				Year:         car.Year,
 				Color:        car.Color,
@@ -749,7 +755,7 @@ func AddCar(db *gorm.DB) gin.HandlerFunc {
 		var car domain.Car
 		fmt.Println("Starting to process the AddCar request")
 
-		car.Brand = c.PostForm("brand")
+		car.Brand.Name = c.PostForm("brand")
 		car.Model = c.PostForm("model")
 		year, err := strconv.Atoi(c.PostForm("year"))
 		if err != nil {
@@ -814,6 +820,21 @@ func AddCar(db *gorm.DB) gin.HandlerFunc {
 		c.Redirect(http.StatusSeeOther, "/admin")
 	}
 }
+
+func Add_Brand_Page(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var brands domain.Brand
+		brands.Name = c.PostForm("brand")
+
+		if err := db.Create(&brands).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "wrong format"})
+			return
+
+		}
+		c.Redirect(http.StatusSeeOther, "/admin/get_brand_page")
+	}
+}
+
 func EditCar(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
@@ -826,7 +847,7 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		// Update car details from the form
-		car.Brand = c.PostForm("brand")
+		car.Brand.Name = c.PostForm("brand")
 		car.Model = c.PostForm("model")
 		year, err := strconv.Atoi(c.PostForm("year"))
 		if err != nil {

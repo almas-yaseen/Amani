@@ -25,10 +25,10 @@ const (
 )
 
 type Car struct {
-	ID    uint   `gorm:"primaryKey;autoIncrement" json:"id"`
-	Brand string `json:"brand"`
-	// Brand          string    `gorm:"foreignKey:BrandID" json:"brand"`
+	ID             uint      `gorm:"primaryKey;autoIncrement" json:"id"`
 	Model          string    `json:"model"`
+	BrandID        uint      `json:"brand_id"`
+	Brand          Brand     `gorm:"foriegnKey:BrandID" json:"brand"`
 	Year           int       `json:"year"`
 	Color          string    `json:"color"`
 	CarType        string    `json:"car_type"`
@@ -48,9 +48,12 @@ type Car struct {
 	Insurance_date string    `json:"insurance_dating"` //new ones
 	Location       string    `json:"location"`         //new ones
 }
+
 type Brand struct {
-	ID      uint `gorm:"primaryKey;autoIncrement"json:"id"`
-	BrandID int  `json:"brand"`
+	ID        uint      `gorm:"primaryKey;autoIncrement"json:"id"`
+	Name      string    `gorm:"unique;not null" json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type Image struct {
