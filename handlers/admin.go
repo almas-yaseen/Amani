@@ -65,7 +65,7 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if err := query.Preload("Images").Find(&cars).Error; err != nil {
+		if err := query.Order("created_at desc").Preload("Images").Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch cars"})
 			return
 		}
@@ -258,7 +258,7 @@ func Show_Youtube_Page(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 		// Fetch links with pagination
-		if err := db.Limit(limit).Offset(offset).Find(&links).Error; err != nil {
+		if err := db.Order("created_at desc").Limit(limit).Offset(offset).Find(&links).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch links"})
 			return
 		}
@@ -286,7 +286,7 @@ func GetYoutubeLinks(db *gorm.DB) gin.HandlerFunc {
 		var links []domain.YoutubeLink
 
 		// Fetch all YouTube links from the database
-		if err := db.Find(&links).Error; err != nil {
+		if err := db.Order("created_at desc").Find(&links).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch YouTube links"})
 			return
 		}
@@ -385,7 +385,7 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 		offset = (page - 1) * limit
 
 		// Fetch cars with pagination
-		if err := db.Limit(limit).Offset(offset).Find(&cars).Error; err != nil {
+		if err := db.Order("created_at desc").Limit(limit).Offset(offset).Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch cars"})
 			return
 		}
@@ -590,7 +590,7 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 
 		var cars []domain.Car
 
-		if err := db.Order("id desc").Limit(5).Find(&cars).Error; err != nil {
+		if err := db.Order("created_at desc").Limit(5).Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch tha database"})
 			return
 
@@ -631,7 +631,7 @@ func GetAllVehicles(db *gorm.DB) gin.HandlerFunc {
 
 		var cars []domain.Car
 
-		if err := db.Order("id desc").Limit(6).Preload("Images").Find(&cars).Error; err != nil {
+		if err := db.Order("created_at desc").Limit(6).Preload("Images").Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch the cars"})
 			return
 		}

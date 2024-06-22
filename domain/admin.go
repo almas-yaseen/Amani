@@ -58,6 +58,8 @@ type User struct {
 	Password string `json:"password"`
 }
 type YoutubeLink struct {
-	ID        uint   `json:"id"`
-	VideoLink string `json:"video_link"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	ID        uint      `json:"id"`
+	VideoLink string    `json:"video_link"`
 }
