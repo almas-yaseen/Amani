@@ -379,7 +379,7 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 		if page < 1 {
 			page = 1
 		}
-		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "5")) // Default limit to 2 if not provided
+		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "5")) // Default limit to 5 if not provided
 
 		// Calculate offset
 		offset = (page - 1) * limit
@@ -402,15 +402,20 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch images"})
 				return
 			}
+		}
 
-			// Fetch the existing CarType and FuelType for the car
-			var existingCar domain.Car
-			if err := db.Where("id = ?", cars[i].ID).First(&existingCar).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch existing car details"})
-				return
-			}
-			cars[i].CarType = existingCar.CarType
-			cars[i].FuelType = existingCar.FuelType
+		// Define car types and fuel types
+		carTypes := []string{
+			domain.CarTypeSedan,
+			domain.CarTypeHatchback,
+			domain.CarTypeSuv,
+			domain.CarTypeBike,
+		}
+		fuelTypes := []string{
+			domain.FuelTypePetrol,
+			domain.FuelTypeDiesel,
+			domain.FuelTypeCNG,
+			domain.FuelTypeElectric,
 		}
 
 		// Generate pagination links
@@ -428,6 +433,8 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 			"Limit":      limit,
 			"TotalPages": totalPages,
 			"Pages":      pages,
+			"CarTypes":   carTypes,
+			"FuelTypes":  fuelTypes,
 		})
 	}
 }
@@ -601,6 +608,7 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 			BannerImage string `json:"bannerImage"`
 			Brand       string `json:"brand"`
 			Id          int    `json:"id"`
+			Year        int    `json:"year"`
 			Model       string `json:"model"`
 			Variant     string `json:"variant"`
 			Price       int    `json:"price"`
@@ -617,6 +625,7 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 				Price:       car.Price,
 				Color:       car.Color,
 				Brand:       car.Brand,
+				Year:        int(car.Year),
 				Id:          int(car.ID),
 			}
 			carDetails = append(carDetails, carDetail)
