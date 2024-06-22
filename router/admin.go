@@ -39,7 +39,6 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 	myapp.GET("/get_choices", handlers.GetChoices)
 	myapp.GET("/get_all_vehicles_homepage", handlers.GetAllVehicles(db))
 	myapp.GET("/get_specific_vehicle/:id", handlers.Get_Specific_Vehicle(db))
-	myapp.GET("/get_brands_image", handlers.Get_Brand_Page(db))
 
 	admin := r.Group("/admin")
 
@@ -47,6 +46,7 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 	{
 		admin.GET("/", handlers.Dashboard(db))
 		admin.GET("/get_youtube_link_form", handlers.Show_Youtube_Page(db))
+		admin.GET("/get_brand_page", handlers.Get_Brand_Page(db))
 		admin.POST("/adding_youtube_form", handlers.Adding_Youtube_Link(db))
 		admin.POST("/get_youtube_link_form_edit/:id", handlers.Youtube_page_edit(db))
 		admin.POST("/get_youtube_link_form_delete/:id", handlers.Youtube_page_delete(db))
