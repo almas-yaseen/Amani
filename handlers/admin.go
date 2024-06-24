@@ -137,12 +137,11 @@ func Get_Brand_Page(db *gorm.DB) gin.HandlerFunc {
 
 func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		var cars []domain.Car
-
 		var count int64
-		fmt.Println("aksdnjkancdkjasndc")
-		brand := c.Query("brand")
+
+		brandIDStr := c.Query("brand_id") //  the query parameter is "brand_id" instead of "brand"
+		fmt.Println("here is the brandid", brandIDStr)
 		carType := c.Query("car_type")
 		fuelType := c.Query("fuel_type")
 		minPrice := c.Query("min_price")
@@ -150,9 +149,13 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 
 		query := db.Model(&domain.Car{})
 
-		if brand != "" {
-			fmt.Println("here is the query", brand)
-			query = query.Where("brand = ?", brand)
+		if brandIDStr != "" {
+			brandID, err := strconv.ParseUint(brandIDStr, 10, 64)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "invalid brand_id format"})
+				return
+			}
+			query = query.Where("brand_id = ?", brandID)
 		}
 		if carType != "" {
 			query = query.Where("car_type = ?", carType)
@@ -178,6 +181,7 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 			}
 			query = query.Where("price <= ?", maxPriceFloat)
 		}
+
 		if err := query.Count(&count).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count cars"})
 			return
@@ -207,9 +211,7 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 
 		// Populate the new structure with the filtered data
 		for _, car := range cars {
-
 			var image string
-
 			if len(car.Images) > 0 {
 				image = car.Images[0].Path // Select the first image path as the representative image
 			}
