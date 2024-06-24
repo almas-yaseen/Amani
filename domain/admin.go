@@ -28,7 +28,7 @@ type Car struct {
 	ID             uint      `gorm:"primaryKey;autoIncrement" json:"id"`
 	Model          string    `json:"model"`
 	BrandID        uint      `json:"brand_id"`
-	Brand          Brand     `gorm:"foriegnKey:BrandID" json:"brand"`
+	Brand          Brand     `gorm:"foreignKey:BrandID" json:"brand"`
 	Year           int       `json:"year"`
 	Color          string    `json:"color"`
 	CarType        string    `json:"car_type"`
@@ -38,7 +38,7 @@ type Car struct {
 	Ownership      int       `json:"ownership"`
 	Bannerimage    string    `json:"bannerimage"`
 	Transmission   string    `json:"transmission"`
-	Images         []Image   `gorm:"foreignKey:CarID" json:"images"`
+	Images         []Image   `gorm:"foreignKey:CarID;constraint:OnDelete:CASCADE" json:"images"`
 	RegNo          string    `json:"regno"`
 	Status         string    `json:"status"`
 	Price          int       `json:"price"`
@@ -51,7 +51,7 @@ type Car struct {
 
 type Brand struct {
 	ID        uint      `gorm:"primaryKey;autoIncrement"json:"id"`
-	Name      string    `gorm:"unique;not null" json:"name"`
+	Name      string    `gorm:"unique;" json:"name"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

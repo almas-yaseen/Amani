@@ -43,9 +43,11 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 	admin.Use(middleware.AuthMiddleware())
 	{
 		admin.GET("/", handlers.Dashboard(db))
+		admin.POST("/edit_brand/:id", handlers.BrandEdit(db))
+		admin.POST("/delete_brand/:id", handlers.BrandDelete(db))
 		admin.GET("/get_youtube_link_form", handlers.Show_Youtube_Page(db))
 		admin.GET("/get_brand_page", handlers.Get_Brand_Page(db))
-		admin.POST("/add_brand_page", handlers.Add_Brand_Page(db))
+		admin.POST("/add_brand", handlers.Add_Brand_Page(db))
 		admin.POST("/adding_youtube_form", handlers.Adding_Youtube_Link(db))
 		admin.POST("/get_youtube_link_form_edit/:id", handlers.Youtube_page_edit(db))
 		admin.POST("/get_youtube_link_form_delete/:id", handlers.Youtube_page_delete(db))

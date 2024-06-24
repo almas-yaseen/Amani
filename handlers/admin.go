@@ -17,6 +17,74 @@ import (
 	"gorm.io/gorm"
 )
 
+func BrandDelete(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var brand domain.Brand
+		id := c.Param("id")
+
+		// Check if the brand exists
+		if err := db.First(&brand, id).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Brand not found"})
+			return
+		}
+
+		// here am
+		if err := db.Model(&domain.Car{}).Where("brand_id = ?", brand.ID).Update("brand_id", nil).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update associated cars"})
+			return
+		}
+
+		// Now delete the brand itself
+		if err := db.Delete(&brand).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete brand"})
+			return
+		}
+
+		// Success message or redirect
+		c.Redirect(http.StatusSeeOther, "/admin/get_brand_page") // Redirect to brands list page
+	}
+}
+
+func BrandEdit(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var brand domain.Brand
+		id := c.Param("id")
+		fmt.Println("here is the id", id)
+
+		// Validate if brand with given ID exists
+		if err := db.First(&brand, id).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Brand not found"})
+			return
+		}
+
+		// Bind form data to update brand name
+		if err := c.ShouldBind(&brand); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid form data"})
+			return
+		}
+
+		// Check if the new name already exists
+		var existingBrand domain.Brand
+		if err := db.Where("name = ?", brand.Name).First(&existingBrand).Error; err == nil && existingBrand.ID != brand.ID {
+			// A brand with this name already exists
+			c.JSON(http.StatusConflict, gin.H{"error": "Brand name already exists"})
+			return
+		}
+
+		// Update brand name
+		brand.Name = c.PostForm("brand_name")
+
+		// Save updated brand to the database
+		if err := db.Save(&brand).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update brand"})
+			return
+		}
+
+		// Redirect or respond with success message
+		c.Redirect(http.StatusSeeOther, "/admin/get_brand_page") // Redirect to brands list page
+	}
+}
+
 func Get_Brand_Page(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -115,7 +183,7 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if err := query.Order("created_at desc").Preload("Images").Find(&cars).Error; err != nil {
+		if err := query.Order("created_at desc").Preload("Brand").Preload("Images").Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch cars"})
 			return
 		}
@@ -212,7 +280,7 @@ func GetFilterTypes(db *gorm.DB) gin.HandlerFunc {
 
 		// Fetch distinct brands
 		var brands []string
-		if err := db.Model(&domain.Car{}).Distinct("brand").Pluck("brand", &brands).Error; err != nil {
+		if err := db.Model(&domain.Brand{}).Distinct("Name").Pluck("Name", &brands).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch brands"})
 			return
 		}
@@ -418,7 +486,7 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			cars       []domain.Car
-			brand      []domain.Brand
+			brands     []domain.Brand
 			totalCount int64
 			page       int
 			limit      int
@@ -435,8 +503,8 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 		// Calculate offset
 		offset = (page - 1) * limit
 
-		// Fetch cars with pagination
-		if err := db.Order("created_at desc").Limit(limit).Offset(offset).Find(&cars).Error; err != nil {
+		//  THis one for brand  fetching
+		if err := db.Preload("Brand").Order("created_at desc").Limit(limit).Offset(offset).Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch cars"})
 			return
 		}
@@ -446,8 +514,10 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch total count"})
 			return
 		}
-		if err := db.Find(&brand).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"wrong": "format"})
+
+		//--> this one for   fetch the brand seperately
+		if err := db.Find(&brands).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch brands"})
 			return
 		}
 
@@ -479,6 +549,7 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 		for i := range pages {
 			pages[i] = i + 1
 		}
+		fmt.Println("here is  the brands", brands)
 
 		// Pass cars, pagination info, and other necessary data to the HTML template
 		c.HTML(http.StatusOK, "admin.html", gin.H{
@@ -487,7 +558,7 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 			"Page":       page,
 			"Limit":      limit,
 			"TotalPages": totalPages,
-			"brands":     brand,
+			"Brands":     brands,
 			"Pages":      pages,
 			"CarTypes":   carTypes,
 			"FuelTypes":  fuelTypes,
@@ -589,7 +660,7 @@ func Get_Pdf_Report(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Query all cars with their images
 		var cars []domain.Car
-		if err := db.Preload("Images").Find(&cars).Error; err != nil {
+		if err := db.Preload("Brand").Preload("Images").Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -598,52 +669,68 @@ func Get_Pdf_Report(db *gorm.DB) gin.HandlerFunc {
 		pdf := gofpdf.New("P", "mm", "A4", "")
 		pdf.AddPage()
 
-		// Set font
-		pdf.SetFont("Arial", "B", 12)
+		// Set header font
+		pdf.SetFont("Arial", "B", 16)
 
 		// Write header
 		pdf.Cell(190, 10, "Cars Report")
 		pdf.Ln(12)
 
-		// Write data to PDF
+		// Loop through cars and write data to PDF
 		for _, car := range cars {
-			pdf.SetFont("Arial", "B", 10)
-			pdf.Cell(190, 10, fmt.Sprintf("Brand: %s, Model: %s", car.Brand, car.Model))
+			pdf.SetFont("Arial", "B", 14)
+			pdf.Cell(190, 10, fmt.Sprintf("Brand: %s, Model: %s", car.Brand.Name, car.Model))
 			pdf.Ln(8)
 
-			pdf.SetFont("Arial", "", 10)
-			pdf.CellFormat(190, 10, fmt.Sprintf("Year: %s", car.Year), "", 0, "L", false, 0, "")
-			pdf.Ln(8)
-			pdf.CellFormat(190, 10, fmt.Sprintf("Color: %s", car.Color), "", 0, "L", false, 0, "")
-			pdf.Ln(8)
-			pdf.CellFormat(190, 10, fmt.Sprintf("Variant: %s", car.Variant), "", 0, "L", false, 0, "")
-			pdf.Ln(8)
-			pdf.CellFormat(190, 10, fmt.Sprintf("Kms: %d", car.Kms), "", 0, "L", false, 0, "")
-			pdf.Ln(8)
-			pdf.CellFormat(190, 10, fmt.Sprintf("Ownership: %d", car.Ownership), "", 0, "L", false, 0, "")
-			pdf.Ln(8)
-			pdf.CellFormat(190, 10, fmt.Sprintf("Transmission: %s", car.Transmission), "", 0, "L", false, 0, "")
-			pdf.Ln(8)
-			pdf.CellFormat(190, 10, fmt.Sprintf("Reg No: %s", car.RegNo), "", 0, "L", false, 0, "")
-			pdf.Ln(8)
-			pdf.CellFormat(190, 10, fmt.Sprintf("Status: %s", car.Status), "", 0, "L", false, 0, "")
-			pdf.Ln(8)
-			pdf.CellFormat(190, 10, fmt.Sprintf("Price: %d", car.Price), "", 0, "L", false, 0, "")
-			pdf.Ln(8)
+			pdf.SetFont("Arial", "", 12)
 
-			pdf.Ln(8)
+			// Create a table layout
+			pdf.CellFormat(50, 10, "Year:", "1", 0, "L", false, 0, "")
+			pdf.CellFormat(140, 10, fmt.Sprintf("%d", car.Year), "1", 0, "L", false, 0, "")
+			pdf.Ln(-1)
 
-			pdf.SetFont("Arial", "B", 10)
+			pdf.CellFormat(50, 10, "Color:", "1", 0, "L", false, 0, "")
+			pdf.CellFormat(140, 10, car.Color, "1", 0, "L", false, 0, "")
+			pdf.Ln(-1)
 
-			pdf.Ln(8)
-			pdf.SetFont("Arial", "", 10)
+			pdf.CellFormat(50, 10, "Variant:", "1", 0, "L", false, 0, "")
+			pdf.CellFormat(140, 10, car.Variant, "1", 0, "L", false, 0, "")
+			pdf.Ln(-1)
 
-			pdf.Ln(10)
+			pdf.CellFormat(50, 10, "Kms:", "1", 0, "L", false, 0, "")
+			pdf.CellFormat(140, 10, fmt.Sprintf("%d", car.Kms), "1", 0, "L", false, 0, "")
+			pdf.Ln(-1)
+
+			pdf.CellFormat(50, 10, "Ownership:", "1", 0, "L", false, 0, "")
+			pdf.CellFormat(140, 10, fmt.Sprintf("%d", car.Ownership), "1", 0, "L", false, 0, "")
+			pdf.Ln(-1)
+
+			pdf.CellFormat(50, 10, "Transmission:", "1", 0, "L", false, 0, "")
+			pdf.CellFormat(140, 10, car.Transmission, "1", 0, "L", false, 0, "")
+			pdf.Ln(-1)
+
+			pdf.CellFormat(50, 10, "Reg No:", "1", 0, "L", false, 0, "")
+			pdf.CellFormat(140, 10, car.RegNo, "1", 0, "L", false, 0, "")
+			pdf.Ln(-1)
+
+			pdf.CellFormat(50, 10, "Status:", "1", 0, "L", false, 0, "")
+			pdf.CellFormat(140, 10, car.Status, "1", 0, "L", false, 0, "")
+			pdf.Ln(-1)
+
+			pdf.CellFormat(50, 10, "Price:", "1", 0, "L", false, 0, "")
+			pdf.CellFormat(140, 10, fmt.Sprintf("%d", car.Price), "1", 0, "L", false, 0, "")
+			pdf.Ln(-1)
+
+			// Add spacing between cars
+			pdf.Ln(12)
 		}
 
 		// Serve the PDF file
 		c.Header("Content-Type", "application/pdf")
-		pdf.Output(c.Writer)
+		err := pdf.Output(c.Writer)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate PDF"})
+		}
 	}
 }
 
@@ -653,7 +740,7 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 
 		var cars []domain.Car
 
-		if err := db.Order("created_at desc").Limit(5).Find(&cars).Error; err != nil {
+		if err := db.Order("created_at desc").Limit(5).Preload("Brand").Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch tha database"})
 			return
 
@@ -696,7 +783,7 @@ func GetAllVehicles(db *gorm.DB) gin.HandlerFunc {
 
 		var cars []domain.Car
 
-		if err := db.Order("created_at desc").Limit(6).Preload("Images").Find(&cars).Error; err != nil {
+		if err := db.Order("created_at desc").Limit(6).Preload("Brand").Preload("Images").Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch the cars"})
 			return
 		}
@@ -753,13 +840,25 @@ func GetAllVehicles(db *gorm.DB) gin.HandlerFunc {
 func AddCar(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var car domain.Car
-		fmt.Println("Starting to process the AddCar request")
+		var brand domain.Brand
 
-		car.Brand.Name = c.PostForm("brand")
+		// Capture brand name from form
+		brandName := c.PostForm("brand")
+
+		// Find the brand in the database
+		if err := db.Where("name = ?", brandName).First(&brand).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Brand not found"})
+			return
+		}
+
+		// Assign the brand ID to the car
+		car.BrandID = brand.ID
+
+		// Populate other car fields from form data
 		car.Model = c.PostForm("model")
 		year, err := strconv.Atoi(c.PostForm("year"))
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid year"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid year"})
 			return
 		}
 		car.Year = year
@@ -772,51 +871,58 @@ func AddCar(db *gorm.DB) gin.HandlerFunc {
 		car.Status = c.PostForm("status")
 		car.Price, _ = strconv.Atoi(c.PostForm("price"))
 		car.CarType = c.PostForm("car_type")
-		fmt.Println("here is the car type", car.CarType)
 		car.FuelType = c.PostForm("fuel_type")
-		car.Engine_size = c.PostForm("engine_size")       //new
-		car.Insurance_date = c.PostForm("insurance_date") //new
-		car.Location = c.PostForm("location")             //new
-		fmt.Println("here is the fuel type", car.FuelType)
-		form, err := c.MultipartForm() // allows files to be uploaded along with other form fields
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to get the form"})
-			return
-		}
-		bannerImage, err := c.FormFile("bannerimage")
-		// Create the full path for the banner image
-		bannerImagePath := filepath.Join("uploads", fmt.Sprintf("%d_%s", car.ID, bannerImage.Filename))
-		fmt.Println("here is the banner image path come on let asscd", bannerImagePath)
-		if err := c.SaveUploadedFile(bannerImage, bannerImagePath); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save the image"})
-			return
-		}
-		// Replace backslashes with forward slashes
-		bannerImagePath = "/" + strings.ReplaceAll(bannerImagePath, "\\", "/")
-		car.Bannerimage = bannerImagePath
+		car.Engine_size = c.PostForm("engine_size")
+		car.Insurance_date = c.PostForm("insurance_date")
+		car.Location = c.PostForm("location")
 
+		// Handle banner image upload
+		bannerImage, err := c.FormFile("bannerimage")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get the banner image"})
+			return
+		}
+		bannerImagePath := filepath.Join("uploads", fmt.Sprintf("%d_%s", time.Now().UnixNano(), bannerImage.Filename))
+		if err := c.SaveUploadedFile(bannerImage, bannerImagePath); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save the banner image"})
+			return
+		}
+		car.Bannerimage = "/" + strings.ReplaceAll(bannerImagePath, "\\", "/")
+
+		// Handle multiple images upload
+		form, err := c.MultipartForm()
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get the form"})
+			return
+		}
 		files := form.File["images[]"]
 		var images []domain.Image
 
 		for _, file := range files {
-			filename := filepath.Base(fmt.Sprintf("%d_%d_%s", car.ID, time.Now().UnixNano(), file.Filename)) // Using current time to ensure unique filename
+			filename := fmt.Sprintf("%d_%s", time.Now().UnixNano(), file.Filename)
 			uploadPath := filepath.Join("uploads", filename)
 			if err := c.SaveUploadedFile(file, uploadPath); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save the image"})
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save an image"})
 				return
 			}
 			imagePath := "/" + strings.ReplaceAll(uploadPath, "\\", "/")
 			images = append(images, domain.Image{Path: imagePath})
-			fmt.Println("here is the second lastone", images)
 		}
 		car.Images = images
 
-		fmt.Println("here is the updated one", car.Images)
+		// Save the car to the database
 		if err := db.Create(&car).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to add the car"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add the car"})
 			return
 		}
 
+		// Optionally preload the brand when querying the car
+		if err := db.Preload("Brand").First(&car, car.ID).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load car with brand"})
+			return
+		}
+
+		// Redirect to admin page after successful car addition
 		c.Redirect(http.StatusSeeOther, "/admin")
 	}
 }
@@ -827,27 +933,24 @@ func Add_Brand_Page(db *gorm.DB) gin.HandlerFunc {
 		brands.Name = c.PostForm("brand")
 
 		if err := db.Create(&brands).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "wrong format"})
-			return
+			c.Redirect(http.StatusSeeOther, "/admin/get_brand_page")
 
 		}
 		c.Redirect(http.StatusSeeOther, "/admin/get_brand_page")
 	}
 }
-
 func EditCar(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		var car domain.Car
 
-		// Fetch the existing car
-		if err := db.Preload("Images").First(&car, id).Error; err != nil {
+		// Fetch the existing car with preloaded images and brand
+		if err := db.Preload("Images").Preload("Brand").First(&car, id).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Car not found"})
 			return
 		}
 
 		// Update car details from the form
-		car.Brand.Name = c.PostForm("brand")
 		car.Model = c.PostForm("model")
 		year, err := strconv.Atoi(c.PostForm("year"))
 		if err != nil {
@@ -857,9 +960,8 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 		car.Year = year
 		car.CarType = c.PostForm("car_type")
 		car.FuelType = c.PostForm("fuel_type")
-
-		car.Engine_size = c.PostForm("engine_size")       //new
-		car.Insurance_date = c.PostForm("insurance_date") //new
+		car.Engine_size = c.PostForm("engine_size")
+		car.Insurance_date = c.PostForm("insurance_date")
 		car.Location = c.PostForm("location")
 		car.Color = c.PostForm("color")
 		car.Variant = c.PostForm("variant")
@@ -870,6 +972,7 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 		car.Status = c.PostForm("status")
 		car.Price, _ = strconv.Atoi(c.PostForm("price"))
 
+		// Handle banner image upload if provided
 		form, err := c.MultipartForm()
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get the form"})
@@ -1011,7 +1114,7 @@ func Get_Specific_Vehicle(db *gorm.DB) gin.HandlerFunc {
 
 		// Fetch the specific vehicle from the database
 		var vehicle domain.Car
-		if err := db.Preload("Images").First(&vehicle, vehicleID).Error; err != nil {
+		if err := db.Preload("Brand").Preload("Images").First(&vehicle, vehicleID).Error; err != nil {
 			fmt.Println("here is the &vechilce")
 			c.JSON(http.StatusNotFound, gin.H{"error": "Vehicle not found"})
 			return

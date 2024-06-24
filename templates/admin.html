@@ -250,11 +250,12 @@
                                         <tbody>
                                             {{range .Cars}}
                                             <tr>
-                                                <td>{{.Brand}}</td>
+                                                <td>{{.Brand.Name}}</td>
                                                 <td>{{.CarType}}</td>
                                                 <td>{{.FuelType}}</td>
                                                 <td>{{.Model}}</td>
                                                 <td>{{.Year}}</td>
+
                                                 <td>{{.Color}}</td>
                                                 <td>{{.Variant}}</td>
                                                 <td>{{.Kms}}</td>
@@ -320,14 +321,22 @@
                                         <div class="modal-body">
                                             <div class="form-group">
                                                 <label>Brand</label>
-                                                <input type="text" name="brand" placeholder="eg" class="form-control" required>
+
+                                                <select name="brand" class="form-control" required>
+                                                    {{range .Brands}}
+
+                                                    <option value="{{.Name}}">{{.Name}}</option>
+
+                                                    {{end}}
+
+                                                </select>
+
+
+
+                                                
                                             </div>
 
-                                            <div class="form-group">
-                                                <label>Year of manufacturing</label>
-                                                <input type="text" name="year_of_manufacturing" class="form-control"
-                                                    required>
-                                            </div>
+                                
                                             <div class="form-group">
                                                 <label>Engine size</label>
                                                 <input type="text" name="engine_size" class="form-control" required>
@@ -445,11 +454,8 @@
                                         <div class="modal-body">
                                             <div class="form-group">
                                                 <label>Brand</label>
-                                                <input type="text" name="brand" value="{{.Brand}}" class="form-control"
-                                                    required>
+                                               <input type="text" class="form-control" value="{{.Brand.Name}}" readonly></lable>
                                             </div>
-
-                                         
                                             <div class="form-group">
                                                 <label>Engine size</label>
                                                 <input type="text" name="engine_size" value="{{.Engine_size}}"
@@ -588,7 +594,7 @@
                                                 aria-hidden="true">&times;</button>
                                         </div>
                                         <div class="modal-body">
-                                            <p>Are you sure you want to delete these Records-<b>{{.Brand}}</b></p>
+                                            <p>Are you sure you want to delete these Records-    <b><strong>{{.Brand.Name}}</strong></b></p>
                                             <p class="text-warning"><small>This action cannot be undone.</small></p>
                                         </div>
                                         <div class="modal-footer">
@@ -627,47 +633,45 @@
     </a> -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-    // Function to populate the dropdowns
-    function populateDropdowns(carTypes, fuelTypes) {
-        const carTypeSelect = document.getElementById('carType');
-        const fuelTypeSelect = document.getElementById('fuelType');
-
-        // Clear existing options
-        carTypeSelect.innerHTML = '';
-        fuelTypeSelect.innerHTML = '';
-
-        // Add options for car types
-        carTypes.forEach(carType => {
-            const option = document.createElement('option');
-            option.value = carType;
-            option.textContent = carType;
-            carTypeSelect.appendChild(option);
+            // Function to populate the dropdowns
+            function populateDropdowns(carTypes, fuelTypes) {
+                const carTypeSelect = document.getElementById('carType');
+                const fuelTypeSelect = document.getElementById('fuelType');
+        
+                // Clear existing options
+                carTypeSelect.innerHTML = '';
+                fuelTypeSelect.innerHTML = '';
+        
+                // Add options for car types
+                carTypes.forEach(carType => {
+                    const option = document.createElement('option');
+                    option.value = carType;
+                    option.textContent = carType;
+                    carTypeSelect.appendChild(option);
+                });
+        
+                // Add options for fuel types
+                fuelTypes.forEach(fuelType => {
+                    const option = document.createElement('option');
+                    option.value = fuelType;
+                    option.textContent = fuelType;
+                    fuelTypeSelect.appendChild(option);
+                });
+            }
+        
+            // Event listener for the modal shown event
+            $('#addCarModal').on('shown.bs.modal', function () {
+                fetch('/myapp/get_choices') // Replace with your actual endpoint URL
+                    .then(response => response.json())
+                    .then(data => {
+                        const carTypes = data.car_types;
+                        const fuelTypes = data.fuel_types;
+                        populateDropdowns(carTypes, fuelTypes);
+                    })
+                    .catch(error => console.error('Error fetching choices:', error));
+            });
         });
-
-        // Add options for fuel types
-        fuelTypes.forEach(fuelType => {
-            const option = document.createElement('option');
-            option.value = fuelType;
-            option.textContent = fuelType;
-            fuelTypeSelect.appendChild(option);
-        });
-    }
-
-    // Event listener for the modal shown event
-    $('#addCarModal').on('shown.bs.modal', function () {
-        fetch('/myapp/get_choices') // Replace with your actual endpoint URL
-            .then(response => response.json())
-            .then(data => {
-                const carTypes = data.car_types;
-                const fuelTypes = data.fuel_types;
-                populateDropdowns(carTypes, fuelTypes);
-            })
-            .catch(error => console.error('Error fetching choices:', error));
-    });
-});
-
-    </script>
-
+        </script>
 
 
 
