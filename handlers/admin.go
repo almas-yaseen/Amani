@@ -273,14 +273,14 @@ func GetFilterTypes(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var filterTypes struct {
-			Brands    []string `json:"brands"`
-			CarTypes  []string `json:"car_types"`
-			FuelTypes []string `json:"fuel_types"`
+			Brands    []domain.Brand `json:"brands"`     // getting the brand
+			CarTypes  []string       `json:"car_types"`  // CarType
+			FuelTypes []string       `json:"fuel_types"` //FuelType
 		}
 
 		// Fetch distinct brands
-		var brands []string
-		if err := db.Model(&domain.Brand{}).Distinct("Name").Pluck("Name", &brands).Error; err != nil {
+		var brands []domain.Brand
+		if err := db.Find(&brands).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch brands"})
 			return
 		}
@@ -550,6 +550,10 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 			pages[i] = i + 1
 		}
 		fmt.Println("here is  the brands", brands)
+
+		for _, car := range cars {
+			fmt.Println("here is teh car.brand", car.Brand.ID)
+		}
 
 		// Pass cars, pagination info, and other necessary data to the HTML template
 		c.HTML(http.StatusOK, "admin.html", gin.H{
@@ -843,16 +847,20 @@ func AddCar(db *gorm.DB) gin.HandlerFunc {
 		var brand domain.Brand
 
 		// Capture brand name from form
-		brandName := c.PostForm("brand")
+		brandIDStr := c.PostForm("brand")
 
-		// Find the brand in the database
-		if err := db.Where("name = ?", brandName).First(&brand).Error; err != nil {
+		brandID, err := strconv.ParseUint(brandIDStr, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid brand ID"})
+			return
+		}
+		if err := db.First(&brand, brandID).Error; err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Brand not found"})
 			return
 		}
 
 		// Assign the brand ID to the car
-		car.BrandID = brand.ID
+		car.BrandID = uint(brandID) // Assuming car.BrandID is of type uint
 
 		// Populate other car fields from form data
 		car.Model = c.PostForm("model")
@@ -942,11 +950,16 @@ func Add_Brand_Page(db *gorm.DB) gin.HandlerFunc {
 func EditCar(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
+		fmt.Println("here is the id", id)
 		var car domain.Car
-
+		var brands []domain.Brand
 		// Fetch the existing car with preloaded images and brand
 		if err := db.Preload("Images").Preload("Brand").First(&car, id).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Car not found"})
+			return
+		}
+		if err := db.Find(&brands).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch brands"})
 			return
 		}
 

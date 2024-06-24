@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <link rel="stylesheet" href="/static/css/panel.css">
 
     <!-- Custom fonts for this template-->
@@ -39,6 +41,20 @@
             display: flex;
             flex-wrap: wrap;
         }
+        @keyframes drive {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.car-animation {
+    display: inline-block;
+    animation: drive 15s linear infinite;
+    font-size: 58px; /* Adjust the size for a bigger car icon */
+}
     </style>
 </head>
 
@@ -241,7 +257,6 @@
                                                 <th>RegNo</th>
                                                 <th>Status</th>
                                                 <th>Engine size</th>
-                                             
                                                 <th>Insurance date</th>
                                                 <th>Location</th>
                                                 <th>Action</th>
@@ -255,57 +270,53 @@
                                                 <td>{{.FuelType}}</td>
                                                 <td>{{.Model}}</td>
                                                 <td>{{.Year}}</td>
-
                                                 <td>{{.Color}}</td>
                                                 <td>{{.Variant}}</td>
                                                 <td>{{.Kms}}</td>
                                                 <td>{{.Ownership}}</td>
                                                 <td>{{.Transmission}}</td>
                                                 <td>{{.Price}}</td>
-                                                <td><img src="{{.Bannerimage}}" alt="Banner Image" class="square-image"
-                                                        style="max-width: 50px; height: auto;"></td>
+                                                <td><img src="{{.Bannerimage}}" alt="Banner Image" class="square-image" style="max-width: 50px; height: auto;"></td>
                                                 <td>
                                                     <div class="image-field">
                                                         {{with index .Images 0}}
-                                                        <img src="{{.Path}}" alt="Car Image" class="square-image"
-                                                            style="max-width: 50px; height: auto;">
+                                                        <img src="{{.Path}}" alt="Car Image" class="square-image" style="max-width: 50px; height: auto;">
                                                         {{end}}
                                                     </div>
                                                 </td>
                                                 <td>{{.RegNo}}</td>
                                                 <td>{{.Status}}</td>
                                                 <td>{{.Engine_size}}</td>
-                                               
                                                 <td>{{.Insurance_date}}</td>
                                                 <td>{{.Location}}</td>
                                                 <td>
-                                                    <a href="#editCarModal-{{.ID}}" class="edit" data-toggle="modal" data-placement="left"
-                                                        title="Edit"><i class="material-icons">&#xE254;</i></a>
-                                                    <a href="#deleteCarModal-{{.ID}}" class="delete" data-toggle="modal" data-placement="right"
-                                                        title="Delete"><i class="material-icons">&#xE872;</i></a>
+                                                    <a href="#editCarModal-{{.ID}}" class="edit" data-toggle="modal" data-placement="left" title="Edit"><i class="material-icons">&#xE254;</i></a>
+                                                    <a href="#deleteCarModal-{{.ID}}" class="delete" data-toggle="modal" data-placement="right" title="Delete"><i class="material-icons">&#xE872;</i></a>
                                                 </td>
                                             </tr>
                                             {{end}}
                                         </tbody>
                                     </table>
-                                </div>
-                            
-                                <div class="clearfix">
-                                    <div class="hint-text">Showing <b>{{len .Cars}}</b> out of <b>{{.TotalCount}}</b> entries</div>
-                                    <ul class="pagination">
-                                        <li class="page-item {{if eq .Page 1}}disabled{{end}}">
-                                            <a href="?page=1&limit={{.Limit}}" class="page-link">Previous</a>
-                                        </li>
-                                        {{range $i, $page := .Pages}}
-                                        <li class="page-item {{if eq $.Page $page}}active{{end}}">
-                                            <a href="?page={{$page}}&limit={{$.Limit}}" class="page-link">{{$page}}</a>
-                                        </li>
-                                        {{end}}
-                                        <li class="page-item {{if eq .Page .TotalPages}}disabled{{end}}">
-                                            <a href="?page={{.TotalPages}}&limit={{.Limit}}" class="page-link">Next</a>
-                                        </li>
-                                    </ul>
-                                </div>
+                                    <div class="car-animation">
+                                        <i class="fas fa-car car-animation"></i>
+                                    </div>
+                                    
+                                    <div class="clearfix">
+                                        <div class="hint-text">Showing <b>{{len .Cars}}</b> out of <b>{{.TotalCount}}</b> entries</div>
+                                        <ul class="pagination">
+                                            <li class="page-item {{if eq .Page 1}}disabled{{end}}">
+                                                <a href="?page=1&limit={{.Limit}}" class="page-link">Previous</a>
+                                            </li>
+                                            {{range $i, $page := .Pages}}
+                                            <li class="page-item {{if eq $.Page $page}}active{{end}}">
+                                                <a href="?page={{$page}}&limit={{$.Limit}}" class="page-link">{{$page}}</a>
+                                            </li>
+                                            {{end}}
+                                            <li class="page-item {{if eq .Page .TotalPages}}disabled{{end}}">
+                                                <a href="?page={{.TotalPages}}&limit={{.Limit}}" class="page-link">Next</a>
+                                            </li>
+                                        </ul>
+                                    </div>
                             
                         </div>
                         <!-- Add Modal HTML -->
@@ -325,7 +336,7 @@
                                                 <select name="brand" class="form-control" required>
                                                     {{range .Brands}}
 
-                                                    <option value="{{.Name}}">{{.Name}}</option>
+                                                    <option value="{{.ID}}">{{.Name}}</option>
 
                                                     {{end}}
 
@@ -453,9 +464,14 @@
                                         </div>
                                         <div class="modal-body">
                                             <div class="form-group">
-                                                <label>Brand</label>
-                                               <input type="text" class="form-control" value="{{.Brand.Name}}" readonly></lable>
-                                            </div>
+                            <label>Brand</label>
+                            <select name="brand" class="form-control">
+                                {{range $.Brands}}
+                                    <option value="{{.ID}}" {{if eq .ID $.Brand.ID}}selected{{end}}>{{.Name}}</option>
+                            
+                                {{end}}
+                            </select>
+                        </div>
                                             <div class="form-group">
                                                 <label>Engine size</label>
                                                 <input type="text" name="engine_size" value="{{.Engine_size}}"
