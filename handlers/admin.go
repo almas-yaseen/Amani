@@ -17,6 +17,49 @@ import (
 	"gorm.io/gorm"
 )
 
+func EditCarPage(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		id := c.Param("id")
+		var car domain.Car
+		var brands []domain.Brand
+
+		if err := db.Preload("Brand").Preload("Images").First(&car, id).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch each car"})
+		}
+
+		if err := db.Find(&brands).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch the cars"})
+			return
+		}
+
+		if err := db.Model(&domain.Car{}).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch total count"})
+			return
+		}
+		carTypes := []string{
+			domain.CarTypeSedan,
+			domain.CarTypeHatchback,
+			domain.CarTypeSuv,
+			domain.CarTypeBike,
+		}
+		fuelTypes := []string{
+			domain.FuelTypePetrol,
+			domain.FuelTypeDiesel,
+			domain.FuelTypeCNG,
+			domain.FuelTypeElectric,
+		}
+
+		c.HTML(http.StatusOK, "edit.html", gin.H{
+			"Car":       car,
+			"Brands":    brands,
+			"CarTypes":  carTypes,
+			"FuelTypes": fuelTypes,
+		})
+	}
+
+}
+
 func BrandDelete(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var brand domain.Brand
@@ -484,6 +527,7 @@ func AdminLogin(c *gin.Context) {
 	c.HTML(http.StatusOK, "login.html", nil)
 
 }
+
 func Dashboard(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -550,11 +594,6 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 		pages := make([]int, totalPages)
 		for i := range pages {
 			pages[i] = i + 1
-		}
-		fmt.Println("here is  the brands", brands)
-
-		for _, car := range cars {
-			fmt.Println("here is teh car.brand", car.Brand.ID)
 		}
 
 		// Pass cars, pagination info, and other necessary data to the HTML template
@@ -881,6 +920,7 @@ func AddCar(db *gorm.DB) gin.HandlerFunc {
 		car.Status = c.PostForm("status")
 		car.Price, _ = strconv.Atoi(c.PostForm("price"))
 		car.CarType = c.PostForm("car_type")
+		fmt.Println("here is the cartype ajdnkljasdnjklasndkjasndcklansdcklnaskclnasjkcdnaskljcdnkajscnklasdncj", car.CarType)
 		car.FuelType = c.PostForm("fuel_type")
 		car.Engine_size = c.PostForm("engine_size")
 		car.Insurance_date = c.PostForm("insurance_date")
@@ -952,14 +992,15 @@ func Add_Brand_Page(db *gorm.DB) gin.HandlerFunc {
 func EditCar(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
-		fmt.Println("here is the id", id)
 		var car domain.Car
 		var brands []domain.Brand
+
 		// Fetch the existing car with preloaded images and brand
 		if err := db.Preload("Images").Preload("Brand").First(&car, id).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Car not found"})
 			return
 		}
+
 		if err := db.Find(&brands).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch brands"})
 			return
@@ -986,14 +1027,13 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 		car.RegNo = c.PostForm("regno")
 		car.Status = c.PostForm("status")
 		car.Price, _ = strconv.Atoi(c.PostForm("price"))
-
-		// Handle banner image upload if provided
 		form, err := c.MultipartForm()
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get the form"})
 			return
 		}
 
+		// Handle banner image upload if provided
 		bannerImage, err := c.FormFile("bannerimage")
 		if err == nil {
 			// Delete the old banner image if it exists
@@ -1013,8 +1053,9 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 			car.Bannerimage = bannerImagePath
 		}
 
-		// Handle the images update
+		// Handle the new images update
 		files := form.File["images[]"]
+		fmt.Println("here is the files", files)
 		var images []domain.Image
 
 		for _, file := range files {
@@ -1044,6 +1085,14 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 			// Save new images
 			car.Images = images
 		}
+
+		brandID, err := strconv.ParseUint(c.PostForm("brand"), 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid brand ID"})
+			return
+		}
+		car.Brand.ID = uint(brandID)
+		fmt.Println("here is the brand id coming", car.BrandID)
 
 		// Save the updated car details
 		if err := db.Save(&car).Error; err != nil {

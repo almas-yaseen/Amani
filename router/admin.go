@@ -54,6 +54,7 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 		admin.POST("/cars/add", handlers.AddCar(db))
 		admin.GET("/cars/pdf_report", handlers.Get_Pdf_Report(db))
 		admin.GET("/logout", handlers.Logout)
+		admin.GET("/edit-car/:id", handlers.EditCarPage(db))
 		admin.POST("/cars/edit/:id", handlers.EditCar(db))
 
 		admin.POST("/cars/delete/:id", handlers.DeleteCar(db))

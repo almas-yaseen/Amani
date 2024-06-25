@@ -243,7 +243,7 @@
                                             <tr>
                                                 <th>Brand</th>
                                                 <th>Car type</th>
-                                                <th>Fuel</th>
+                                                <th>Fuel Type</th>
                                                 <th>Model</th>
                                                 <th>Year</th>
                                                 <th>Color</th>
@@ -263,6 +263,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            {{if .Cars}}
                                             {{range .Cars}}
                                             <tr>
                                                 <td>{{.Brand.Name}}</td>
@@ -290,11 +291,16 @@
                                                 <td>{{.Insurance_date}}</td>
                                                 <td>{{.Location}}</td>
                                                 <td>
-                                                    <a href="#editCarModal-{{.ID}}" class="edit" data-toggle="modal" data-placement="left" title="Edit"><i class="material-icons">&#xE254;</i></a>
+                                                    <a href="/admin/edit-car/{{.ID}}" ><i class="material-icons">&#xE254;</i></a>
                                                     <a href="#deleteCarModal-{{.ID}}" class="delete" data-toggle="modal" data-placement="right" title="Delete"><i class="material-icons">&#xE872;</i></a>
                                                 </td>
                                             </tr>
                                             {{end}}
+                                        {{else}}
+                                            <tr>
+                                                <td colspan="19" class="text-center"><strong>No cars available. Please add one </strong></td>
+                                            </tr>
+                                        {{end}}
                                         </tbody>
                                     </table>
                                     <div class="car-animation">
@@ -398,13 +404,19 @@
                                                 <input type="number" name="price" class="form-control" required>
                                             </div>
                                             <div class="form-group">
-                                                <label>Car Type </label>
-                                                <select name="car_type" id="carType" class="form-control" requried>
+                                                <label>Car Type</label>
+                                                <select name="car_type" id="carType" class="form-control" required>
+                                                    {{range .CarTypes}}
+                                                    <option value="{{.}}">{{.}}</option>
+                                                    {{end}}
                                                 </select>
                                             </div>
                                             <div class="form-group">
                                                 <label>Fuel Type</label>
                                                 <select name="fuel_type" id="fuelType" class="form-control" required>
+                                                    {{range .FuelTypes}}
+                                                    <option value="{{.}}">{{.}}</option>
+                                                    {{end}}
                                                 </select>
                                             </div>
 
@@ -451,150 +463,7 @@
                                 </div>
                             </div>
                         </div>
-                        {{range .Cars}}
-                        <div id="editCarModal-{{.ID}}" class="modal fade">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <form id="editForm-{{.ID}}" action="/admin/cars/edit/{{.ID}}" method="post"
-                                        enctype="multipart/form-data">
-                                        <div class="modal-header">
-                                            <h4 class="modal-title">Edit Car</h4>
-                                            <button type="button" class="close" data-dismiss="modal"
-                                                aria-hidden="true">&times;</button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="form-group">
-                            <label>Brand</label>
-                            <select name="brand" class="form-control">
-                                {{range $.Brands}}
-                                    <option value="{{.ID}}" {{if eq .ID $.Brand.ID}}selected{{end}}>{{.Name}}</option>
-                            
-                                {{end}}
-                            </select>
-                        </div>
-                                            <div class="form-group">
-                                                <label>Engine size</label>
-                                                <input type="text" name="engine_size" value="{{.Engine_size}}"
-                                                    class="form-control" required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Insurance date</label>
-                                                <input type="text" name="insurance_date" value="{{.Insurance_date}}"
-                                                    class="form-control" required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Location</label>
-                                                <input type="text" name="location" value="{{.Location}}"
-                                                    class="form-control" required>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label>Model</label>
-                                                <input type="text" name="model" value="{{.Model}}" class="form-control"
-                                                    required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Year</label>
-                                                <input type="text" name="year" class="form-control" value="{{.Year}}"
-                                                    required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Color</label>
-                                                <input type="text" name="color" value="{{.Color}}" class="form-control"
-                                                    required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Variant</label>
-                                                <input type="text" name="variant" value="{{.Variant}}"
-                                                    class="form-control" required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Kms</label>
-                                                <input type="text" name="kms" value="{{.Kms}}" class="form-control"
-                                                    required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Car Type</label>
-                                                <select name="car_type" class="form-control" required>
-                                                    <option value="{{.CarType}}" selected>{{.CarType}}</option>
-                                                    {{range $.CarTypes}}
-                                                    {{if ne . $.CarType}}
-                                                    <option value="{{.}}">{{.}}</option>
-                                                    {{end}}
-                                                    {{end}}
-                                                </select>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Fuel Type</label>
-                                                <select name="fuel_type" class="form-control" required>
-                                                    <option value="{{.FuelType}}" selected>{{.FuelType}}</option>
-                                                    {{range $.FuelTypes}}
-                                                    {{if ne . $.FuelType}}
-                                                    <option value="{{.}}">{{.}}</option>
-                                                    {{end}}
-                                                    {{end}}
-                                                </select>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Ownership</label>
-                                                <input type="text" name="ownership" value="{{.Ownership}}"
-                                                    class="form-control" required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Transmission</label>
-                                                <input type="text" name="transmission" value="{{.Transmission}}"
-                                                    class="form-control" required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Price</label>
-                                                <input type="text" name="price" value="{{.Price}}" class="form-control"
-                                                    required>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Banner Image</label>
-                                                <img src="{{.Bannerimage}}" alt="Existing Banner Image"
-                                                    style="width: 100px; height: auto;">
-                                                <a href="https://www.remove.bg/upload" target="blank">
-                                                    <p><strong>Click here to remove background<strong></p>
-                                                </a>
-                                                <input type="file" name="bannerimage" class="form-control">
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Images</label>
-                                                <div id="existingImages">
-                                                    {{range .Images}}
-                                                    <img src="{{.Path}}" class="existing-image" alt="Existing Image"
-                                                        style="width: 100px; height: auto;">
-                                                    <input type="hidden" name="existing_images[]" value="{{.Path}}">
-                                                    {{end}}
-                                                </div>
-                                            </div>
-                                            <div id="imagePreview-{{.ID}}" class="image-preview"></div>
-                                            <div class="form-group">
-                                                <label>RegNo</label>
-                                                <input type="text" name="regno" class="form-control" value="{{.RegNo}}"
-                                                    required>
-                                            </div>
-                                           
-                  
-                                            <div class="form-group">
-                                                <label>Status</label>
-                                                <select name="status" class="form-control" required>
-                                                    <option value="sold" {{if eq .Status "sold"}}selected{{end}}>Sold</option>
-                                                    <option value="available" {{if eq .Status "available"}}selected{{end}}>Available</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <input type="button" class="btn btn-default" data-dismiss="modal"
-                                                value="Cancel">
-                                            <input type="submit" class="btn btn-info" value="Save">
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        {{end}}
+                       
 
 
                         {{range .Cars}}
@@ -647,50 +516,7 @@
     <!-- <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a> -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Function to populate the dropdowns
-            function populateDropdowns(carTypes, fuelTypes) {
-                const carTypeSelect = document.getElementById('carType');
-                const fuelTypeSelect = document.getElementById('fuelType');
-        
-                // Clear existing options
-                carTypeSelect.innerHTML = '';
-                fuelTypeSelect.innerHTML = '';
-        
-                // Add options for car types
-                carTypes.forEach(carType => {
-                    const option = document.createElement('option');
-                    option.value = carType;
-                    option.textContent = carType;
-                    carTypeSelect.appendChild(option);
-                });
-        
-                // Add options for fuel types
-                fuelTypes.forEach(fuelType => {
-                    const option = document.createElement('option');
-                    option.value = fuelType;
-                    option.textContent = fuelType;
-                    fuelTypeSelect.appendChild(option);
-                });
-            }
-        
-            // Event listener for the modal shown event
-            $('#addCarModal').on('shown.bs.modal', function () {
-                fetch('/myapp/get_choices') // Replace with your actual endpoint URL
-                    .then(response => response.json())
-                    .then(data => {
-                        const carTypes = data.car_types;
-                        const fuelTypes = data.fuel_types;
-                        populateDropdowns(carTypes, fuelTypes);
-                    })
-                    .catch(error => console.error('Error fetching choices:', error));
-            });
-        });
-        </script>
-
-
-
+ 
 
     <script src="/static/js/almas.js"></script>
     <script src="/static/vendor/jquery/jquery.min.js"></script>
