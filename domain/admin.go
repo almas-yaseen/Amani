@@ -17,6 +17,7 @@ const (
 	CarTypeHatchback = "hatchback"
 	CarTypeSuv       = "suv"
 	CarTypeBike      = "bike"
+	CarTypeSport     = "sport"
 	//  fuel type  choices
 	FuelTypePetrol   = "petrol"
 	FuelTypeDiesel   = "diesel"

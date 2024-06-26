@@ -581,6 +581,7 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 			domain.CarTypeHatchback,
 			domain.CarTypeSuv,
 			domain.CarTypeBike,
+			domain.CarTypeSport,
 		}
 		fuelTypes := []string{
 			domain.FuelTypePetrol,
@@ -1027,6 +1028,7 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 		car.RegNo = c.PostForm("regno")
 		car.Status = c.PostForm("status")
 		car.Price, _ = strconv.Atoi(c.PostForm("price"))
+		fmt.Println("here is teh price")
 		form, err := c.MultipartForm()
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get the form"})
