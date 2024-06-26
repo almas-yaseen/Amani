@@ -243,6 +243,8 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 			Status       string `json:"status"`
 			Year         int    `json:"year"`
 			Color        string `json:"color"`
+			CarType      string `json:"car_type"`
+			FuelType     string `json:"fuel_type"`
 			Variant      string `json:"variant"`
 			Kms          int    `json:"kms"`
 			Ownership    int    `json:"ownership"`
@@ -265,6 +267,8 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 				Model:        car.Model,
 				Year:         car.Year,
 				Color:        car.Color,
+				CarType:      car.CarType,
+				FuelType:     car.FuelType,
 				Variant:      car.Variant,
 				Kms:          car.Kms,
 				Ownership:    car.Ownership,
@@ -844,6 +848,8 @@ func GetAllVehicles(db *gorm.DB) gin.HandlerFunc {
 			Year         int    `json:"year"`
 			Color        string `json:"color"`
 			Variant      string `json:"variant"`
+			CarType      string `json:"car_type"` //new one
+			FuelType     string `json:"fuel_type"`
 			Kms          int    `json:"kms"`
 			Ownership    int    `json:"ownership"`
 			Bannerimage  string `json:"bannerimage"`
@@ -871,6 +877,8 @@ func GetAllVehicles(db *gorm.DB) gin.HandlerFunc {
 				Variant:      car.Variant,
 				Kms:          car.Kms,
 				Ownership:    car.Ownership,
+				FuelType:     car.FuelType,
+				CarType:      car.CarType,
 				Bannerimage:  car.Bannerimage,
 				Transmission: car.Transmission,
 				RegNo:        car.RegNo,
