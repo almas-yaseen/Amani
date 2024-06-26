@@ -1039,12 +1039,6 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 		car.Status = c.PostForm("status")
 		car.Price, _ = strconv.Atoi(c.PostForm("price"))
 
-		form, err := c.MultipartForm()
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get the form"})
-			return
-		}
-
 		// Handle banner image upload if provided
 		bannerImage, err := c.FormFile("bannerimage")
 		if err == nil {
@@ -1066,29 +1060,29 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		// Handle the new images update
-		files := form.File["images[]"]
-		var images []domain.Image
+		form, err := c.MultipartForm()
+		if err == nil {
+			files := form.File["images[]"]
+			var newImages []domain.Image
 
-		for _, file := range files {
-			filename := filepath.Base(fmt.Sprintf("%d_%d_%s", car.ID, time.Now().UnixNano(), file.Filename))
-			uploadPath := filepath.Join("uploads", filename)
-			if err := c.SaveUploadedFile(file, uploadPath); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save the image"})
-				return
+			for _, file := range files {
+				filename := filepath.Base(fmt.Sprintf("%d_%d_%s", car.ID, time.Now().UnixNano(), file.Filename))
+				uploadPath := filepath.Join("uploads", filename)
+				if err := c.SaveUploadedFile(file, uploadPath); err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save the image"})
+					return
+				}
+				imagePath := "/" + strings.ReplaceAll(uploadPath, "\\", "/")
+				newImages = append(newImages, domain.Image{Path: imagePath})
 			}
-			imagePath := "/" + strings.ReplaceAll(uploadPath, "\\", "/")
-			images = append(images, domain.Image{Path: imagePath})
-		}
 
-		// Update the car's images
-		if len(images) > 0 {
-			car.Images = append(car.Images, images...)
+			if len(newImages) > 0 {
+				car.Images = append(car.Images, newImages...)
+			}
 		}
 
 		// Handle image deletion if requested
 		deleteImageIDs := c.PostFormArray("delete_images")
-		fmt.Println("herer is the deleted images", deleteImageIDs)
-
 		if len(deleteImageIDs) > 0 {
 			var remainingImages []domain.Image
 			for _, img := range car.Images {
@@ -1105,16 +1099,31 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 					// Delete image from filesystem if needed
 					if err := deleteFile(strings.TrimPrefix(img.Path, "/")); err != nil {
 						fmt.Println("Failed to delete image:", err)
-						// Handle error if required
 					}
-					// Delete image from the database
-					if err := db.Delete(&img).Error; err != nil {
-						c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete image from database"})
-						return
-					}
+					// Also, delete the image from the database
+					db.Delete(&img)
 				}
 			}
 			car.Images = remainingImages
+		}
+
+		// Handle image replacement
+		for _, img := range car.Images {
+			file, err := c.FormFile(fmt.Sprintf("replace_image_%d", img.ID))
+			if err == nil {
+				// Delete the old image from filesystem
+				if err := deleteFile(strings.TrimPrefix(img.Path, "/")); err != nil {
+					fmt.Println("Failed to delete image:", err)
+				}
+				// Save the new image
+				uploadPath := filepath.Join("uploads", fmt.Sprintf("%d_%d_%s", car.ID, time.Now().UnixNano(), file.Filename))
+				if err := c.SaveUploadedFile(file, uploadPath); err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save the image"})
+					return
+				}
+				img.Path = "/" + strings.ReplaceAll(uploadPath, "\\", "/")
+				db.Save(&img) // Save the updated path to the database
+			}
 		}
 
 		brandID, err := strconv.ParseUint(c.PostForm("brand"), 10, 64)
@@ -1122,7 +1131,7 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid brand ID"})
 			return
 		}
-		car.Brand.ID = uint(brandID)
+		car.BrandID = uint(brandID)
 
 		// Save the updated car details
 		if err := db.Save(&car).Error; err != nil {

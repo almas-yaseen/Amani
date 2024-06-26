@@ -420,41 +420,33 @@
                                                     {{ range .Car.Images }}
                                                     <div class="existing-image-container">
                                                         <img style="width: 50px; height: auto;" src="{{ .Path }}" class="existing-image" alt="Existing Image">
-                                                        <input type="checkbox" name="delete_images" value="{{ .ID }}"> Delete
+                                                        <input type="checkbox" name="delete_images" value="{{ .ID }}">
+                                                        <label for="replace_image_{{ .ID }}">
+                                                            <i class="fa fa-plus" aria-hidden="true" style="cursor: pointer;"></i> Replace
+                                                        </label>
+                                                        <input type="file" id="replace_image_{{ .ID }}" name="replace_image_{{ .ID }}" class="form-control-file image-input" accept="image/*" style="display:none;">
                                                     </div>
                                                     {{ end }}
                                                 {{ else }}
                                                     <p>No images available.</p>
                                                 {{ end }}
                                             </div>
-    
-                                            </div>
                                         </div>
                                     </div>
+                                
                                     <div class="row">
-    
-                                        <div class="row">
-                                            <div class="container">
-                                                <div class="form-group">
-                                                    <label>Update Images</label>
-                                                    <div id="imageInputsContainer">
-                                                        <input type="file" name="images[]"
-                                                            class="form-control-file image-input" accept="image/*">
-                                                    </div>
-                                                    <button type="button" id="addImageInput"
-                                                        class="btn btn-primary mt-2">Add Another
-                                                        Image</button>
+                                        <div class="container">
+                                            <div class="form-group">
+                                                <label>Update Images</label>
+                                                <div id="imageInputsContainer">
+                                                    <input type="file" name="images[]" class="form-control-file image-input" accept="image/*">
                                                 </div>
-                                                <div id="imagePreview"></div>
-    
-    
-    
-    
+                                                <button type="button" id="addImageInput" class="btn btn-primary mt-2">Add Another Image</button>
                                             </div>
+                                            <div id="imagePreview"></div>
                                         </div>
-                                        
-                                        
                                     </div>
+                                </div>
                                     <div id="imagePreview-{{.ID}}" class="image-preview row"></div>
                                 </div>
                                 
@@ -489,6 +481,19 @@
                         newInput.required = true;
                         container.appendChild(newInput);
                     });
+                    document.addEventListener("DOMContentLoaded", function() {
+    const addImageInputButton = document.getElementById("addImageInput");
+    const imageInputsContainer = document.getElementById("imageInputsContainer");
+
+    addImageInputButton.addEventListener("click", function() {
+        const newImageInput = document.createElement("input");
+        newImageInput.type = "file";
+        newImageInput.name = "images[]";
+        newImageInput.className = "form-control-file image-input";
+        newImageInput.accept = "image/*";
+        imageInputsContainer.appendChild(newImageInput);
+    });
+});
 
                 </script>
                 <script src="/static/js/almas.js"></script>
