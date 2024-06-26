@@ -17,6 +17,7 @@ const (
 	CarTypeHatchback = "hatchback"
 	CarTypeSuv       = "suv"
 	CarTypeBike      = "bike"
+	CarTypeSport     = "sport"
 	//  fuel type  choices
 	FuelTypePetrol   = "petrol"
 	FuelTypeDiesel   = "diesel"
@@ -26,8 +27,9 @@ const (
 
 type Car struct {
 	ID             uint      `gorm:"primaryKey;autoIncrement" json:"id"`
-	Brand          string    `json:"brand"`
 	Model          string    `json:"model"`
+	BrandID        uint      `json:"brand_id"`                        //
+	Brand          Brand     `gorm:"foreignKey:BrandID" json:"brand"` //
 	Year           int       `json:"year"`
 	Color          string    `json:"color"`
 	CarType        string    `json:"car_type"`
@@ -37,7 +39,7 @@ type Car struct {
 	Ownership      int       `json:"ownership"`
 	Bannerimage    string    `json:"bannerimage"`
 	Transmission   string    `json:"transmission"`
-	Images         []Image   `gorm:"foreignKey:CarID" json:"images"`
+	Images         []Image   `gorm:"foreignKey:CarID;constraint:OnDelete:CASCADE" json:"images"`
 	RegNo          string    `json:"regno"`
 	Status         string    `json:"status"`
 	Price          int       `json:"price"`
@@ -47,6 +49,14 @@ type Car struct {
 	Insurance_date string    `json:"insurance_dating"` //new ones
 	Location       string    `json:"location"`         //new ones
 }
+
+type Brand struct {
+	ID        uint      `gorm:"primaryKey;autoIncrement"json:"id"`
+	Name      string    `gorm:"unique;" json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 type Image struct {
 	ID    uint   `gorm:"primaryKey;autoIncrement" json:"id"`
 	CarID uint   `json:"car_id"`
@@ -58,6 +68,8 @@ type User struct {
 	Password string `json:"password"`
 }
 type YoutubeLink struct {
-	ID        uint   `json:"id"`
-	VideoLink string `json:"video_link"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	ID        uint      `json:"id"`
+	VideoLink string    `json:"video_link"`
 }

@@ -1,42 +1,3 @@
-
-      
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/myapp/get_choices')
-                .then(response => response.json())
-                .then(data => {
-                    const carTypes = data.car_types;
-                    const fuelTypes = data.fuel_types;
-        
-                    const carTypeSelect = document.getElementById('carType');
-                    const fuelTypeSelect = document.getElementById('fuelType');
-        
-                    carTypes.forEach(carType => {
-                        const option = document.createElement('option');
-                        option.value = carType;
-                        option.textContent = carType;
-                        carTypeSelect.appendChild(option);
-                    });
-        
-                    fuelTypes.forEach(fuelType => {
-                        const option = document.createElement('option');
-                        option.value = fuelType;
-                        option.textContent = fuelType;
-                        fuelTypeSelect.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error fetching choices:', error));
-        });
-
-
-
-
-
-
-
-
-
-
-
         // Function to add a new file input
         function addImageInput() {
             const container = document.getElementById('imageInputsContainer');
@@ -64,6 +25,7 @@
                     reader.onload = function() {
                         const image = new Image();
                         image.src = reader.result;
+                        image.style = 'width: 50px; height: 50px;'
                         image.classList.add('square-image');
                         previewContainer.appendChild(image);
                     }
