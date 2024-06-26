@@ -240,6 +240,7 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 			ID           uint   `json:"id"`
 			Brand        string `json:"brand"`
 			Model        string `json:"model"`
+			Status       string `json:"status"`
 			Year         int    `json:"year"`
 			Color        string `json:"color"`
 			Variant      string `json:"variant"`
@@ -268,6 +269,7 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 				Kms:          car.Kms,
 				Ownership:    car.Ownership,
 				Transmission: car.Transmission,
+				Status:       car.Status,
 				Price:        car.Price,
 				Image:        image,
 			}
