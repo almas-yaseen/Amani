@@ -416,16 +416,17 @@
                                         <div class="form-group">
                                             <label>Images</label>
                                             <div id="existingImages" class="image-grid d-flex">
-                                                {{range .Car.Images}}
-                                                <div class="existing-image-container">
-                                                    <img style="width: 50px; height: auto;" src="{{.Path}}"
-                                                        class="existing-image" alt="Existing Image">
-                                                    <input type="hidden" name="existing_images[]" value="{{.Path}}">
-    
-    
-                                                </div>
-                                                {{end}}
-    
+                                                {{ if .Car.Images }}
+                                                    {{ range .Car.Images }}
+                                                    <div class="existing-image-container">
+                                                        <img style="width: 50px; height: auto;" src="{{ .Path }}" class="existing-image" alt="Existing Image">
+                                                        <input type="checkbox" name="delete_images" value="{{ .ID }}"> Delete
+                                                    </div>
+                                                    {{ end }}
+                                                {{ else }}
+                                                    <p>No images available.</p>
+                                                {{ end }}
+                                            </div>
     
                                             </div>
                                         </div>

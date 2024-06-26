@@ -1038,7 +1038,7 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 		car.RegNo = c.PostForm("regno")
 		car.Status = c.PostForm("status")
 		car.Price, _ = strconv.Atoi(c.PostForm("price"))
-		fmt.Println("here is teh price")
+
 		form, err := c.MultipartForm()
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get the form"})
@@ -1067,7 +1067,6 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 
 		// Handle the new images update
 		files := form.File["images[]"]
-		fmt.Println("here is the files", files)
 		var images []domain.Image
 
 		for _, file := range files {
@@ -1081,21 +1080,41 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 			images = append(images, domain.Image{Path: imagePath})
 		}
 
-		// Update the car's images if new images are uploaded
+		// Update the car's images
 		if len(images) > 0 {
-			// Delete existing images from the file system and the database
+			car.Images = append(car.Images, images...)
+		}
+
+		// Handle image deletion if requested
+		deleteImageIDs := c.PostFormArray("delete_images")
+		fmt.Println("herer is the deleted images", deleteImageIDs)
+
+		if len(deleteImageIDs) > 0 {
+			var remainingImages []domain.Image
 			for _, img := range car.Images {
-				if err := deleteFile(strings.TrimPrefix(img.Path, "/")); err != nil {
-					fmt.Println("Failed to delete old image:", err)
+				shouldDelete := false
+				for _, id := range deleteImageIDs {
+					if strconv.Itoa(int(img.ID)) == id {
+						shouldDelete = true
+						break
+					}
+				}
+				if !shouldDelete {
+					remainingImages = append(remainingImages, img)
+				} else {
+					// Delete image from filesystem if needed
+					if err := deleteFile(strings.TrimPrefix(img.Path, "/")); err != nil {
+						fmt.Println("Failed to delete image:", err)
+						// Handle error if required
+					}
+					// Delete image from the database
+					if err := db.Delete(&img).Error; err != nil {
+						c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete image from database"})
+						return
+					}
 				}
 			}
-
-			if err := db.Where("car_id = ?", car.ID).Delete(&domain.Image{}).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete existing images"})
-				return
-			}
-			// Save new images
-			car.Images = images
+			car.Images = remainingImages
 		}
 
 		brandID, err := strconv.ParseUint(c.PostForm("brand"), 10, 64)
@@ -1104,7 +1123,6 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 		car.Brand.ID = uint(brandID)
-		fmt.Println("here is the brand id coming", car.BrandID)
 
 		// Save the updated car details
 		if err := db.Save(&car).Error; err != nil {

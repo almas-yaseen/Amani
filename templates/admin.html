@@ -353,14 +353,17 @@
                                                 <td>{{.Price}}</td>
                                                 <td><img src="{{.Bannerimage}}" alt="Banner Image" class="square-image"
                                                         style="max-width: 50px; height: auto;"></td>
-                                                <td>
-                                                    <div class="image-field">
-                                                        {{with index .Images 0}}
-                                                        <img src="{{.Path}}" alt="Car Image" class="square-image"
-                                                            style="max-width: 50px; height: auto;">
-                                                        {{end}}
-                                                    </div>
-                                                </td>
+                                                        <td>
+                                                            <div class="image-field">
+                                                                {{ if gt (len .Images) 0 }}
+                                                                    <img src="{{ (index .Images 0).Path }}" alt="Car Image" class="square-image" style="max-width: 50px; height: auto;">
+                                                                {{ else }}
+                                                                    <p>No image available</p>
+                                                                {{ end }}
+                                                            </div>
+                                                        </td>
+                                                        
+                                                        
                                                 <td>{{.RegNo}}</td>
                                                 <td>{{.Status}}</td>
                                                 <td>{{.Engine_size}}</td>
