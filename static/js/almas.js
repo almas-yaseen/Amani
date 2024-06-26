@@ -25,6 +25,7 @@
                     reader.onload = function() {
                         const image = new Image();
                         image.src = reader.result;
+                        image.style = 'width: 50px; height: 50px;'
                         image.classList.add('square-image');
                         previewContainer.appendChild(image);
                     }
