@@ -29,6 +29,75 @@
     <!-- Custom styles for this template-->
     <link href="/static/css/sb-admin-2.min.css" rel="stylesheet">
     <style>
+    .animation-container {
+    position: relative;
+    display: inline-block;
+    overflow: hidden; /* Ensure that the text and emoji do not overflow out of the container */
+    width: 100%; /* Adjust based on the desired width of the container */
+}
+
+.moving-title {
+    position: relative;
+    display: inline-block;
+    white-space: nowrap;
+    animation: moveTitle 10s linear infinite;
+}
+
+.racing-car {
+    position: absolute;
+    bottom: 0;
+    left: -50px; /* Adjust initial position */
+    font-size: 2rem; /* Adjust size based on preference */
+    animation: moveCar 10s linear infinite;
+}
+
+.animation-container {
+    position: relative;
+    display: inline-block;
+    overflow: hidden; /* Ensure that the text and emoji do not overflow out of the container */
+    width: 100%; /* Adjust based on the desired width of the container */
+}
+
+.moving-title {
+    position: relative;
+    display: inline-block;
+    white-space: nowrap;
+    animation: moveTitle 10s linear infinite;
+}
+
+.racing-car {
+    position: absolute;
+    bottom: 0;
+    left: -50px; /* Adjust initial position */
+    font-size: 2rem; /* Adjust size based on preference */
+    animation: moveCar 10s linear infinite;
+}
+
+@keyframes moveTitle {
+    0% {
+        left: -100%;
+    }
+    50% {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+@keyframes moveCar {
+    0% {
+        left: -100%;
+    }
+    50% {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    100% {
+        left: 100%;
+    }
+}
         .square-image {
             width: 100px;
             height: 100px;
@@ -236,6 +305,9 @@
                                         <div class="row">
                                             <div class="col-sm-6">
                                                 <h2>Manage <b>Cars</b></h2>
+
+                                                <h2 class="moving-title" style="color:#ffff">Welcome to Amani Motors</h2>
+                                                <span class="racing-car">🏎️</span>
                                             </div>
                                         </div>
                                         <div class="row pt-2"></div>

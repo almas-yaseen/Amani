@@ -27,6 +27,22 @@
     <!-- Custom styles for this template-->
     <link href="/static/css/sb-admin-2.min.css" rel="stylesheet">
     <link href="/static/css/pen.css">
+    <style>
+
+#imagePreview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns with equal width */
+    gap: 10px; /* Adjust spacing between images */
+}
+
+.square-image {
+    width: 60%; /* Occupy full width of its grid cell */
+    height: auto; /* Maintain aspect ratio */
+    object-fit: cover; /* Ensure the image covers the entire container */
+    border-radius: 5px; /* Optional: Add rounded corners */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Optional: Add shadow effect */
+}
+    </style>
 
 </head>
 
