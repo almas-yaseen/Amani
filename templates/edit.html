@@ -175,60 +175,7 @@
 
       <!-- Main Content -->
       <div id="content">
-        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-
-          <!-- Sidebar Toggle (Topbar) -->
-          <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-            <i class="fa fa-bars"></i>
-          </button>
-
-          <!-- Topbar Search -->
-
-          <div class="d-flex w-100 justify-content-between ">
-            <button style="font-size: 0.8rem;" type="button" class="btn btn-sm btn-success d-flex align-items-center"
-              data-toggle="modal" data-target="#addCarModals">
-              <i class="material-icons">&#xE147;</i>
-              <span class="pl-1 display-6">Add Youtube Video</span>
-            </button>
-            <button style="font-size: 0.7rem;" type="button"
-              class="btn btn-sm btn-outline-danger d-flex align-items-center" data-toggle="modal"
-              data-target="#logoutModal">
-              <i class="material-icons">&#xE879;</i>
-              <span class="pl-2 display-6">Logout</span>
-            </button>
-          </div>
-
-          <!-- Logout Modal -->
-          <div id="logoutModal" class="modal fade text-black-50">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h4 class="modal-title">Confirm Logout</h4>
-                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                </div>
-                <div class="modal-body">
-                  <p>Are you sure you want to logout?</p>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                  <a href="/admin/logout" class="btn btn-danger">Logout</a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-
-          <!-- Topbar Navbar -->
-          <ul class="navbar-nav ml-auto">
-
-            <!-- Nav Item - Alerts -->
-
-
-          </ul>
-
-
-
-        </nav>
+     
         <!-- End of Topbar -->
 
 
@@ -243,7 +190,7 @@
             <div class="table-title">
             <div class="row">
                 <div class="col-sm-6">
-                    <h2>Manage <b>Links</b></h2>
+                    <h2>Edit <b>Cars</b></h2>
                 </div>
             </div>
             <div class="row pt-2"></div>
@@ -333,8 +280,8 @@
                                     <div class="form-group">
                                         <label>Status</label>
                                     <select name="status" class="form-control" required>
-                                         <option value="sold" {{if eq .Status "sold"}}selected{{end}}>Sold</option>
-                                    <option value="available" {{if eq .Status "available"}}selected{{end}}>Available</option>
+                                         <option value="sold" {{if eq .Car.Status "sold"}}selected{{end}}>Sold</option>
+                                    <option value="available" {{if eq .Car.Status "available"}}selected{{end}}>Available</option>
                                      </select>
                                      
                                     </div>
