@@ -472,29 +472,41 @@ func Show_Youtube_Page(db *gorm.DB) gin.HandlerFunc {
 func GetYoutubeLinks(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			links  []domain.YoutubeLink
-			page   int
-			limit  int
-			offset int
+			links      []domain.YoutubeLink
+			page       int
+			limit      int
+			offset     int
+			totalCount int64
 		)
 
 		page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
-
 		if err != nil || page < 1 {
 			page = 1
 		}
+
 		limit, err = strconv.Atoi(c.DefaultQuery("limit", "10"))
+		if err != nil || limit < 1 {
+			limit = 10
+		}
 
 		offset = (page - 1) * limit
 
 		// Fetch all YouTube links from the database
+		if err := db.Model(&domain.YoutubeLink{}).Count(&totalCount).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count"})
+			return
+		}
+
 		if err := db.Order("created_at desc").Limit(limit).Offset(offset).Find(&links).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch YouTube links"})
 			return
 		}
 
 		// Respond with JSON containing YouTube links
-		c.JSON(http.StatusOK, links)
+		c.JSON(http.StatusOK, gin.H{
+			"links":      links,
+			"totalCount": totalCount,
+		})
 	}
 }
 
