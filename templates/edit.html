@@ -406,65 +406,57 @@
                                             <p><strong>Click here to remove background<strong>
                                             </p>
                                         </a>
-                                        <input type="file" name="bannerimage" class="form-control">
+                                        <input type="file" id="bannerImageInput" name="bannerimage" class="form-control">
+                                        <div id="PreviousImage"></div>
                                     </div>
                                 </div>
-
 
                                 <div class="my-2 container border rounded p-3">
                                     <div class="row">
                                         <div class="form-group">
                                             <label>Images</label>
                                             <div id="existingImages" class="image-grid d-flex">
-                                                {{range .Car.Images}}
-                                                <div class="existing-image-container">
-                                                    <img style="width: 50px; height: auto;" src="{{.Path}}"
-                                                        class="existing-image" alt="Existing Image">
-                                                    <input type="hidden" name="existing_images[]" value="{{.Path}}">
-    
-    
+                                                {{ if .Car.Images }}
+                                                {{ range .Car.Images }}
+                                                <div class="existing-image-container" id="container_{{ .ID }}">
+                                                    <input type="checkbox" name="delete_images" value="{{ .ID }}" onchange="toggleImageVisibility('{{ .ID }}')">
+                                                    <br>
+                                                    <img style="width: 50px; height: auto;" src="{{ .Path }}" class="existing-image" alt="Existing Image" id="image_{{ .ID }}">
+                                                    <br>
+                                                    <br>
+                                                    <label for="replace_image_{{ .ID }}">
+                                                        <i class="fa fa-plus" aria-hidden="true" style="cursor: pointer;"></i> 
+                                                    </label>
+                                                    <input type="file" id="replace_image_{{ .ID }}" name="replace_image_{{ .ID }}" class="form-control-file image-input" accept="image/*" style="display:none;" onchange="replaceImage('{{ .ID }}', event)">
                                                 </div>
-                                                {{end}}
-    
-    
+                                                {{ end }}
+                                                {{ else }}
+                                                <p>No images available.</p>
+                                                {{ end }}
                                             </div>
                                         </div>
                                     </div>
+                                
                                     <div class="row">
-    
-                                        <div class="row">
-                                            <div class="container">
-                                                <div class="form-group">
-                                                    <label>Update Images</label>
-                                                    <div id="imageInputsContainer">
-                                                        <input type="file" name="images[]"
-                                                            class="form-control-file image-input" accept="image/*">
-                                                    </div>
-                                                    <button type="button" id="addImageInput"
-                                                        class="btn btn-primary mt-2">Add Another
-                                                        Image</button>
+                                        <div class="container">
+                                            <div class="form-group">
+                                                <label>Update Images</label>
+                                                <div id="imageInputsContainer">
+                                                    <input type="file" name="images[]" class="form-control-file image-input" accept="image/*">
                                                 </div>
-                                                <div id="imagePreview"></div>
-    
-    
-    
-    
+                                                <button type="button" id="addImageInput" class="btn btn-primary mt-2">Add Another Image</button>
                                             </div>
+                                            <div id="imagePreview"></div>
+                                            <div id="ReplaceImage"></div>
                                         </div>
-                                        
-                                        
                                     </div>
-                                    <div id="imagePreview-{{.ID}}" class="image-preview row"></div>
                                 </div>
                                 
-
-
-                                    <div class="row pb-3">
-                                        <div
-                                            class="col-12 d-flex flex-column justify-content-center align-items-center">
-                                                <button type="submit" class="btn btn-success btn-block">Submit</button>
-                                        </div>
+                                <div class="row pb-3">
+                                    <div class="col-12 d-flex flex-column justify-content-center align-items-center">
+                                        <button type="submit" class="btn btn-success btn-block">Submit</button>
                                     </div>
+                                </div>
                         </div>
 
                         </form>
@@ -479,7 +471,75 @@
                 </a>
 
                 <script>
-                    document.getElementById('addAnotherlink').addEventListener('click', function () {
+   
+   function toggleImageVisibility(id) {
+        console.log('Toggle visibility for ID:', id); // Debugging step
+        var checkbox = document.querySelector(`input[name="delete_images"][value="${id}"]`);
+        var imageContainer = document.getElementById(`container_${id}`);
+        console.log('Checkbox:', checkbox); // Debugging step
+        console.log('Image Container:', imageContainer); // Debugging step
+        if (checkbox && imageContainer) {
+            if (checkbox.checked) {
+                imageContainer.style.display = 'none';
+            } else {
+                imageContainer.style.display = 'block';
+            }
+        } else {
+            console.error('Element not found for ID:', id); // Debugging step
+        }
+    }
+
+
+
+
+
+
+                     document.getElementById('bannerImageInput').addEventListener('change', function(event) {
+            const imagePreview = document.getElementById('PreviousImage');
+            imagePreview.innerHTML = ''; // Clear previous preview
+
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                  img.style = 'width: 50px; height: 50px;'
+                    imagePreview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+        function replaceImage(imageID, event) {
+              var fileInput = event.target;
+          var file = fileInput.files[0];
+             var reader = new FileReader();
+
+    reader.onload = function(e) {
+        var imageElement = document.getElementById('image_' + imageID);
+        imageElement.src = e.target.result;
+    }
+
+    reader.readAsDataURL(file);
+
+    // Optionally, you can also submit the form automatically to save the new image on the server
+    // var form = fileInput.closest('form');
+    // form.submit();
+}
+           document.getElementById('addAnotherlink').addEventListener('click', function () {
                         var container = document.getElementById('Youtubelinkcontainer');
                         var newInput = document.createElement('input');
                         newInput.type = 'url';
@@ -488,6 +548,19 @@
                         newInput.required = true;
                         container.appendChild(newInput);
                     });
+                    document.addEventListener("DOMContentLoaded", function() {
+    const addImageInputButton = document.getElementById("addImageInput");
+    const imageInputsContainer = document.getElementById("imageInputsContainer");
+
+    addImageInputButton.addEventListener("click", function() {
+        const newImageInput = document.createElement("input");
+        newImageInput.type = "file";
+        newImageInput.name = "images[]";
+        newImageInput.className = "form-control-file image-input";
+        newImageInput.accept = "image/*";
+        imageInputsContainer.appendChild(newImageInput);
+    });
+});
 
                 </script>
                 <script src="/static/js/almas.js"></script>
