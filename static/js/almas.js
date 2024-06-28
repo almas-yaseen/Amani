@@ -1,4 +1,8 @@
-        // Function to add a new file input
+
+
+
+
+// Function to add a new file input
         function addImageInput() {
             const container = document.getElementById('imageInputsContainer');
             const newInput = document.createElement('input');

@@ -516,17 +516,18 @@
                                                             <option value="{{.}}">{{.}}</option>
                                                             {{end}}
                                                         </select>
-                                                    </div>
+                                                      </div>
 
 
 
                                                     <div class="form-group">
                                                         <label>Banner image</label>
-                                                        <input type="file" name="bannerimage" accept="image/*" required>
+                                                        <input type="file"  id="bannerImageInput"  name="bannerimage" accept="image/*" required>
                                                         <a href="https://www.remove.bg/upload" target="blank">
                                                             <p><strong> Dont forget to click here Click here to remove
                                                                     background<strong></p>
                                                         </a>
+                                                        <div id="PreviousImage"></div>
 
                                                     </div>
                                                     <div class="form-group">
@@ -619,6 +620,24 @@
             <!-- <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a> -->
+    <script>
+        document.getElementById('bannerImageInput').addEventListener('change', function(event) {
+            const imagePreview = document.getElementById('PreviousImage');
+            imagePreview.innerHTML = ''; // Clear previous preview
+
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style = 'width:50px;height:50px'
+                    imagePreview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
 
 
             <script src="/static/js/almas.js"></script>

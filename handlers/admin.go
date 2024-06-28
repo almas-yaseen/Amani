@@ -180,8 +180,27 @@ func Get_Brand_Page(db *gorm.DB) gin.HandlerFunc {
 
 func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var cars []domain.Car
-		var count int64
+
+		var (
+			cars   []domain.Car
+			count  int64
+			page   int
+			limit  int
+			offset int
+		)
+
+		// Validate and set pagination parameters
+		page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+		if err != nil || page < 1 {
+			page = 1
+		}
+
+		limit, err = strconv.Atoi(c.DefaultQuery("limit", "10"))
+		if err != nil || limit < 1 {
+			limit = 2
+		}
+
+		offset = (page - 1) * limit
 
 		brandIDStr := c.Query("brand_id") //  the query parameter is "brand_id" instead of "brand"
 		fmt.Println("here is the brandid", brandIDStr)
@@ -230,7 +249,7 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if err := query.Order("created_at desc").Preload("Brand").Preload("Images").Find(&cars).Error; err != nil {
+		if err := query.Order("created_at desc").Preload("Brand").Preload("Images").Limit(limit).Offset(offset).Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch cars"})
 			return
 		}
