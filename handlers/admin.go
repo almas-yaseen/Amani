@@ -17,6 +17,182 @@ import (
 	"gorm.io/gorm"
 )
 
+func GetAllCustomers(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			images     []domain.CustomerImage
+			totalCount int64
+			page       int
+			limit      int
+			offset     int
+		)
+
+		// Parse query parameters for pagination
+		page, _ = strconv.Atoi(c.DefaultQuery("page", "1"))
+		if page < 1 {
+			page = 1
+		}
+		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "1")) // Default limit to 10 if not provided
+
+		// Calculate offset
+		offset = (page - 1) * limit
+
+		// Fetch total count of entries
+		if err := db.Model(&domain.CustomerImage{}).Count(&totalCount).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count entries"})
+			return
+		}
+
+		// Fetch images with pagination
+		if err := db.Order("created_at desc").Limit(limit).Offset(offset).Find(&images).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch images"})
+			return
+		}
+
+		// Generate pagination information
+
+		c.JSON(http.StatusOK, gin.H{
+			"images":     images,
+			"totalCount": totalCount,
+		})
+	}
+}
+
+func DeleteCustomerImage(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		var customerImage domain.CustomerImage
+
+		// Find the image record in the database
+		if err := db.First(&customerImage, id).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Image not found"})
+			return
+		}
+
+		// Optionally, remove the file from the filesystem
+		if err := os.Remove(customerImage.Path); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete the image file"})
+			return
+		}
+
+		// Delete the record from the database
+		if err := db.Delete(&customerImage).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete the image record"})
+			return
+		}
+
+		c.Redirect(http.StatusSeeOther, "/admin/get_uploads_page")
+	}
+}
+func EditCustomerImage(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		var customerImage domain.CustomerImage
+
+		if err := db.First(&customerImage, id).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Image not found"})
+			return
+		}
+
+		file, err := c.FormFile("image")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid image"})
+			return
+		}
+
+		// Save the new file
+		newImagePath := filepath.Join("uploads", fmt.Sprintf("%d_%s", time.Now().UnixNano(), file.Filename))
+		if err := c.SaveUploadedFile(file, newImagePath); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save the new image"})
+			return
+		}
+
+		// Update the database
+		customerImage.Path = newImagePath
+		if err := db.Save(&customerImage).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update the image"})
+			return
+		}
+
+		c.Redirect(http.StatusSeeOther, "/admin/get_uploads_page")
+	}
+}
+
+func Add_Customer_Form(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var customer domain.CustomerImage
+
+		customerImage, err := c.FormFile("image")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch": "image"})
+			return
+		}
+
+		customerImagePath := filepath.Join("uploads", fmt.Sprintf("%d_%s", time.Now().UnixNano(), customerImage.Filename))
+		if err := c.SaveUploadedFile(customerImage, customerImagePath); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save the image"})
+			return
+		}
+
+		customer.Path = customerImagePath
+
+		if err := db.Create(&customer).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to add the customer image"})
+			return
+		}
+		c.Redirect(http.StatusSeeOther, "/admin/get_uploads_page")
+	}
+}
+
+func UploadImage(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			images     []domain.CustomerImage
+			totalCount int64
+			page       int
+			limit      int
+			offset     int
+		)
+
+		// Parse query parameters for pagination
+		page, _ = strconv.Atoi(c.DefaultQuery("page", "1"))
+		if page < 1 {
+			page = 1
+		}
+		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "10"))
+
+		// Calculate offset
+		offset = (page - 1) * limit
+
+		// Fetch total count of entries
+		if err := db.Model(&domain.CustomerImage{}).Count(&totalCount).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count entries"})
+			return
+		}
+
+		// Fetch links with pagination
+		if err := db.Order("created_at desc").Limit(limit).Offset(offset).Find(&images).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch links"})
+			return
+		}
+
+		// Generate pagination links
+		totalPages := int(math.Ceil(float64(totalCount) / float64(limit)))
+		pages := make([]int, totalPages)
+		for i := range pages {
+			pages[i] = i + 1
+		}
+
+		c.HTML(http.StatusOK, "customers.html", gin.H{
+			"Images":     images,
+			"TotalCount": totalCount,
+			"Page":       page,
+			"Limit":      limit,
+			"TotalPages": totalPages,
+			"Pages":      pages,
+		})
+	}
+}
 func EditCarPage(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
