@@ -128,7 +128,7 @@ func Add_Customer_Form(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		customerImagePath := filepath.Join("uploads", fmt.Sprintf("%d_%s", time.Now().UnixNano(), customerImage.Filename))
+		customerImagePath := filepath.Join("uploads/customer", fmt.Sprintf("%d_%s", time.Now().UnixNano(), customerImage.Filename))
 		if err := c.SaveUploadedFile(customerImage, customerImagePath); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save the image"})
 			return

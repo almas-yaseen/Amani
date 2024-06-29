@@ -80,6 +80,16 @@
           <small>Dashboard</small> <sup></sup>
         </div>
       </a>
+      <a class="sidebar-brand d-flex align-items-center justify-content-around w-full"
+      href="/admin/get_uploads_page">
+       <div style="font-size: 1rem;" class="font-weight-normal">
+           <i class="fa fa-upload" aria-hidden="true"></i>
+       </div>
+       <div class="sidebar-brand-text font-weight-normal btn btn-sm btn-outline-light">
+           <small>Uploads</small> <sup></sup>
+       </div>
+   </a>
+               
 
       <a class="sidebar-brand d-flex align-items-center justify-content-around w-full"
         href="/admin/get_youtube_link_form">
@@ -227,7 +237,7 @@
             <div class="table-title">
             <div class="row">
                 <div class="col-sm-6">
-                    <h2>Manage <b>Links</b></h2>
+                    <h2>Customer <b>Delivery</b></h2>
                 </div>
             </div>
             <div class="row pt-2"></div>
@@ -275,7 +285,10 @@
                             <form action="/admin/edit_customer_image/{{ $image.ID }}" method="POST" enctype="multipart/form-data">
                               <div class="form-group">
                                 <label for="editImage">Customer Image</label>
-                                <input type="file" class="form-control" id="editImage" name="image" />
+                                <input type="file" class="form-control" id="editImage{{ $image.ID }}" name="image" onchange="previewImage(event, {{ $image.ID }})" />
+                                <div id="newImagePreview{{ $image.ID }}" style="margin-top: 10px;">
+                                  <img id="newImage{{ $image.ID }}" style="max-width: 100px;" />
+                                
                               </div>
                               <button type="submit" class="btn btn-primary">Save Changes</button>
                             </form>
@@ -309,18 +322,19 @@
           <i class="fas fa-angle-up"></i>
         </a>
 
-        <script>
-          document.getElementById('addAnotherlink').addEventListener('click', function () {
-            var container = document.getElementById('Youtubelinkcontainer');
-            var newInput = document.createElement('input');
-            newInput.type = 'url';
-            newInput.name = 'links[]'; // Ensure name ends with []
-            newInput.className = 'form-control mt-2';
-            newInput.required = true;
-            container.appendChild(newInput);
-          });
+       
 
-        </script>
+        <script>
+          function previewImage(event, id) {
+            var reader = new FileReader();
+            reader.onload = function() {
+              var output = document.getElementById('newImage' + id);
+              output.src = reader.result;
+              output.style.display = 'block';
+            }
+            reader.readAsDataURL(event.target.files[0]);
+          }
+          </script>
         <script src="/static/js/almas.js"></script>
         <script src="/static/vendor/jquery/jquery.min.js"></script>
         <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
