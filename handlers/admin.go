@@ -32,7 +32,7 @@ func GetAllCustomers(db *gorm.DB) gin.HandlerFunc {
 		if page < 1 {
 			page = 1
 		}
-		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "1")) // Default limit to 10 if not provided
+		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "10")) // Default limit to 10 if not provided
 
 		// Calculate offset
 		offset = (page - 1) * limit
