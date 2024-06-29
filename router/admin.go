@@ -33,6 +33,7 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 	r.GET("/admin/login", handlers.AdminLogin) // gettin
 	r.POST("/adminlogin", handlers.AdminLogin) // submitting the form
 	myapp.GET("/get_filter_types", handlers.GetFilterTypes(db))
+	myapp.GET("/get_customer_details", handlers.GetAllCustomers(db))
 	myapp.GET("/get_stock_car_all", handlers.Get_Stock_Car_All(db))
 	myapp.GET("/get_youtube_links", handlers.GetYoutubeLinks(db))
 	myapp.GET("/get_banner_vehicles", handlers.Get_Banner_Vehicles(db))
@@ -44,6 +45,10 @@ func AdminRoutes(r *gin.RouterGroup, db *gorm.DB) *gin.RouterGroup {
 	{
 		admin.GET("/", handlers.Dashboard(db))
 		admin.POST("/edit_brand/:id", handlers.BrandEdit(db))
+		admin.GET("/get_uploads_page", handlers.UploadImage(db))            //image uploading
+		admin.POST("/adding_customer_form", handlers.Add_Customer_Form(db)) //customer form
+		admin.POST("/edit_customer_image/:id", handlers.EditCustomerImage(db))
+		admin.POST("/delete_customer_image/:id", handlers.DeleteCustomerImage(db))
 		admin.POST("/delete_brand/:id", handlers.BrandDelete(db))
 		admin.GET("/get_youtube_link_form", handlers.Show_Youtube_Page(db))
 		admin.GET("/get_brand_page", handlers.Get_Brand_Page(db))

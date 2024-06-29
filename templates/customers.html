@@ -160,7 +160,7 @@
             <button style="font-size: 0.8rem;" type="button" class="btn btn-sm btn-success d-flex align-items-center"
               data-toggle="modal" data-target="#addCarModals">
               <i class="material-icons">&#xE147;</i>
-              <span class="pl-1 display-6">Add Youtube Video</span>
+              <span class="pl-1 display-6">Add Customer image</span>
             </button>
             <button style="font-size: 0.7rem;" type="button"
               class="btn btn-sm btn-outline-danger d-flex align-items-center" data-toggle="modal"
@@ -207,9 +207,9 @@
         <div id="addCarModals" class="modal fade">
           <div class="modal-dialog">
             <div class="modal-content">
-              <form action="/admin/adding_youtube_form" method="post" enctype="multipart/form-data">
+              <form action="/admin/adding_customer_form" method="post" enctype="multipart/form-data">
                 <div class="modal-header">
-                  <h4 class="modal-title">Add Youtube link</h4>
+                  <h4 class="modal-title">Add  Customer image</h4>
 
                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                     &times;
@@ -217,13 +217,11 @@
                 </div>
                 <div class="modal-body">
                   <div class="form-group">
-                    <label>Add link</label>
+                    <label>Add CustomerImage</label>
                     <div id="Youtubelinkcontainer">
-                      <input type="url" name="links[]" placeholder="Paste video link here." class="form-control" required />
+                      <input type="file" name="image" placeholder="Paste teh." class="form-control" required />
                     </div>
-                    <button type="button" id="addAnotherlink" class="btn btn-primary mt-2">
-                      Add Another Link
-                    </button>
+                    
                   </div>
                 </div>
                 <div class="modal-footer">
@@ -243,7 +241,7 @@
             <div class="table-title">
             <div class="row">
                 <div class="col-sm-6">
-                    <h2>Manage <b>Links</b></h2>
+                    <h2>Customer <b>Delivery</b></h2>
                 </div>
             </div>
             <div class="row pt-2"></div>
@@ -252,83 +250,69 @@
               <thead>
                   <tr>
                       <th scope="col">#</th>
-                      <th scope="col">Youtube Links</th>
+                      <th scope="col">Customer image</th>
                       <th scope="col">Edit</th>
                       <th scope="col">Delete</th>
                   </tr>
               </thead>
               <tbody>
-                  {{ range $index, $link := .links }}
-                  <tr>
-                      <th scope="row">{{$index}}</th>
-                      <td >
-                          <a href="{{ $link.VideoLink }}" target="_blank">{{ $link.VideoLink }}</a>
-                      </td>
-                      <td>
-                          <!-- Button to trigger the modal -->
-                          <button type="button" class="btn btn-success" data-toggle="modal"
-                              data-target="#editModal{{$link.ID}}">
-                              Edit
-                          </button>
-      
-                          <!-- Modal -->
-                          <div class="modal fade" id="editModal{{$link.ID}}" tabindex="-1" role="dialog"
-                              aria-labelledby="editModalLabel{{$link.ID}}" aria-hidden="true">
-                              <div class="modal-dialog" role="document">
-                                  <div class="modal-content">
-                                      <div class="modal-header">
-                                          <h5 class="modal-title" id="editModalLabel{{$link.ID}}">
-                                              Edit YouTube Link
-                                          </h5>
-                                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                              <span aria-hidden="true">&times;</span>
-                                          </button>
-                                      </div>
-                                      <div class="modal-body">
-                                          <!-- Form to edit the YouTube link -->
-                                          <form action="/admin/get_youtube_link_form_edit/{{ $link.ID }}"
-                                              method="POST" enctype="multipart/form-data">
-                                              <div class="form-group">
-                                                  <label for="editVideoLink">YouTube Video Link</label>
-                                                  <input type="text" class="form-control" id="editVideoLink"
-                                                      name="editVideoLink" value="{{ $link.VideoLink }}" required />
-                                              </div>
-                                              <button type="submit" class="btn btn-primary">
-                                                  Save Changes
-                                              </button>
-                                          </form>
-                                      </div>
-                                  </div>
-                              </div>
+                {{ range $index, $image := .Images }}
+                <tr>
+                  <th scope="row">{{ $index }}</th>
+                  <td>
+                    <img src="/{{ $image.Path }}" alt="Customer Image" style="max-width: 50px;"/>
+                  </td>
+                  <td>
+                    <!-- Button to trigger the modal -->
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#editModal{{ $image.ID }}">
+                      Edit
+                    </button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="editModal{{ $image.ID }}" tabindex="-1" role="dialog"
+                      aria-labelledby="editModalLabel{{ $image.ID }}" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="editModalLabel{{ $image.ID }}">Edit Customer Image</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
                           </div>
-                      </td>
-                      <td>
-                          <!-- Form to delete the YouTube link -->
-                          <form action="/admin/get_youtube_link_form_delete/{{ $link.ID }}" method="POST">
-                              <button type="submit" class="btn btn-danger">Delete</button>
-                          </form>
-                      </td>
-                  </tr>
-                  {{ end }}
+                          <div class="modal-body">
+                            <div class="form-group">
+                <label>Current Image</label>
+                <div>
+                  <img src="/{{ $image.Path }}" alt="Customer Image" style="max-width: 100px;"/>
+                </div>
+              </div>
+                            <!-- Form to edit the image -->
+                            <form action="/admin/edit_customer_image/{{ $image.ID }}" method="POST" enctype="multipart/form-data">
+                              <div class="form-group">
+                                <label for="editImage">Customer Image</label>
+                                <input type="file" class="form-control" id="editImage{{ $image.ID }}" name="image" onchange="previewImage(event, {{ $image.ID }})" />
+                                <div id="newImagePreview{{ $image.ID }}" style="margin-top: 10px;">
+                                  <img id="newImage{{ $image.ID }}" style="max-width: 100px;" />
+                                
+                              </div>
+                              <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <!-- Form to delete the image -->
+                    <form action="/admin/delete_customer_image/{{ $image.ID }}" method="POST">
+                      <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+                {{ end }}
               </tbody>
           </table>
           </div>
-          <div class="clearfix">
-            <div class="hint-text">Showing <b>{{len .links}}</b> out of <b>{{.TotalCount}}</b> entries</div>
-            <ul class="pagination">
-                <li class="page-item {{if eq .Page 1}}disabled{{end}}">
-                    <a href="?page=1&limit={{.Limit}}" class="page-link">Previous</a>
-                </li>
-                {{range $i, $page := .Pages}}
-                <li class="page-item {{if eq $.Page $page}}active{{end}}">
-                    <a href="?page={{$page}}&limit={{$.Limit}}" class="page-link">{{$page}}</a>
-                </li>
-                {{end}}
-                <li class="page-item {{if eq .Page .TotalPages}}disabled{{end}}">
-                    <a href="?page={{.TotalPages}}&limit={{.Limit}}" class="page-link">Next</a>
-                </li>
-            </ul>
-        </div>
+         
         
       </div>
     </div>
@@ -342,18 +326,19 @@
           <i class="fas fa-angle-up"></i>
         </a>
 
-        <script>
-          document.getElementById('addAnotherlink').addEventListener('click', function () {
-            var container = document.getElementById('Youtubelinkcontainer');
-            var newInput = document.createElement('input');
-            newInput.type = 'url';
-            newInput.name = 'links[]'; // Ensure name ends with []
-            newInput.className = 'form-control mt-2';
-            newInput.required = true;
-            container.appendChild(newInput);
-          });
+       
 
-        </script>
+        <script>
+          function previewImage(event, id) {
+            var reader = new FileReader();
+            reader.onload = function() {
+              var output = document.getElementById('newImage' + id);
+              output.src = reader.result;
+              output.style.display = 'block';
+            }
+            reader.readAsDataURL(event.target.files[0]);
+          }
+          </script>
         <script src="/static/js/almas.js"></script>
         <script src="/static/vendor/jquery/jquery.min.js"></script>
         <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>

@@ -17,6 +17,182 @@ import (
 	"gorm.io/gorm"
 )
 
+func GetAllCustomers(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			images     []domain.CustomerImage
+			totalCount int64
+			page       int
+			limit      int
+			offset     int
+		)
+
+		// Parse query parameters for pagination
+		page, _ = strconv.Atoi(c.DefaultQuery("page", "1"))
+		if page < 1 {
+			page = 1
+		}
+		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "10")) // Default limit to 10 if not provided
+
+		// Calculate offset
+		offset = (page - 1) * limit
+
+		// Fetch total count of entries
+		if err := db.Model(&domain.CustomerImage{}).Count(&totalCount).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count entries"})
+			return
+		}
+
+		// Fetch images with pagination
+		if err := db.Order("created_at desc").Limit(limit).Offset(offset).Find(&images).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch images"})
+			return
+		}
+
+		// Generate pagination information
+
+		c.JSON(http.StatusOK, gin.H{
+			"images":     images,
+			"totalCount": totalCount,
+		})
+	}
+}
+
+func DeleteCustomerImage(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		var customerImage domain.CustomerImage
+
+		// Find the image record in the database
+		if err := db.First(&customerImage, id).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Image not found"})
+			return
+		}
+
+		// Optionally, remove the file from the filesystem
+		if err := os.Remove(customerImage.Path); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete the image file"})
+			return
+		}
+
+		// Delete the record from the database
+		if err := db.Delete(&customerImage).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete the image record"})
+			return
+		}
+
+		c.Redirect(http.StatusSeeOther, "/admin/get_uploads_page")
+	}
+}
+func EditCustomerImage(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		var customerImage domain.CustomerImage
+
+		if err := db.First(&customerImage, id).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Image not found"})
+			return
+		}
+
+		file, err := c.FormFile("image")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid image"})
+			return
+		}
+
+		// Save the new file
+		newImagePath := filepath.Join("uploads", fmt.Sprintf("%d_%s", time.Now().UnixNano(), file.Filename))
+		if err := c.SaveUploadedFile(file, newImagePath); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save the new image"})
+			return
+		}
+
+		// Update the database
+		customerImage.Path = newImagePath
+		if err := db.Save(&customerImage).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update the image"})
+			return
+		}
+
+		c.Redirect(http.StatusSeeOther, "/admin/get_uploads_page")
+	}
+}
+
+func Add_Customer_Form(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var customer domain.CustomerImage
+
+		customerImage, err := c.FormFile("image")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"failed to fetch": "image"})
+			return
+		}
+
+		customerImagePath := filepath.Join("uploads/customer", fmt.Sprintf("%d_%s", time.Now().UnixNano(), customerImage.Filename))
+		if err := c.SaveUploadedFile(customerImage, customerImagePath); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save the image"})
+			return
+		}
+
+		customer.Path = customerImagePath
+
+		if err := db.Create(&customer).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to add the customer image"})
+			return
+		}
+		c.Redirect(http.StatusSeeOther, "/admin/get_uploads_page")
+	}
+}
+
+func UploadImage(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			images     []domain.CustomerImage
+			totalCount int64
+			page       int
+			limit      int
+			offset     int
+		)
+
+		// Parse query parameters for pagination
+		page, _ = strconv.Atoi(c.DefaultQuery("page", "1"))
+		if page < 1 {
+			page = 1
+		}
+		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "10"))
+
+		// Calculate offset
+		offset = (page - 1) * limit
+
+		// Fetch total count of entries
+		if err := db.Model(&domain.CustomerImage{}).Count(&totalCount).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count entries"})
+			return
+		}
+
+		// Fetch links with pagination
+		if err := db.Order("created_at desc").Limit(limit).Offset(offset).Find(&images).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch links"})
+			return
+		}
+
+		// Generate pagination links
+		totalPages := int(math.Ceil(float64(totalCount) / float64(limit)))
+		pages := make([]int, totalPages)
+		for i := range pages {
+			pages[i] = i + 1
+		}
+
+		c.HTML(http.StatusOK, "customers.html", gin.H{
+			"Images":     images,
+			"TotalCount": totalCount,
+			"Page":       page,
+			"Limit":      limit,
+			"TotalPages": totalPages,
+			"Pages":      pages,
+		})
+	}
+}
 func EditCarPage(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
@@ -180,8 +356,27 @@ func Get_Brand_Page(db *gorm.DB) gin.HandlerFunc {
 
 func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var cars []domain.Car
-		var count int64
+
+		var (
+			cars   []domain.Car
+			count  int64
+			page   int
+			limit  int
+			offset int
+		)
+
+		// Validate and set pagination parameters
+		page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+		if err != nil || page < 1 {
+			page = 1
+		}
+
+		limit, err = strconv.Atoi(c.DefaultQuery("limit", "10"))
+		if err != nil || limit < 1 {
+			limit = 2
+		}
+
+		offset = (page - 1) * limit
 
 		brandIDStr := c.Query("brand_id") //  the query parameter is "brand_id" instead of "brand"
 		fmt.Println("here is the brandid", brandIDStr)
@@ -230,7 +425,7 @@ func Get_Stock_Car_All(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		if err := query.Order("created_at desc").Preload("Brand").Preload("Images").Find(&cars).Error; err != nil {
+		if err := query.Order("created_at desc").Preload("Brand").Preload("Images").Limit(limit).Offset(offset).Find(&cars).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch cars"})
 			return
 		}
@@ -415,7 +610,7 @@ func Show_Youtube_Page(db *gorm.DB) gin.HandlerFunc {
 		if page < 1 {
 			page = 1
 		}
-		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "5")) // Default limit to 2 if not provided
+		limit, _ = strconv.Atoi(c.DefaultQuery("limit", "10")) // Default limit to 2 if not provided
 
 		// Calculate offset
 		offset = (page - 1) * limit
@@ -452,16 +647,42 @@ func Show_Youtube_Page(db *gorm.DB) gin.HandlerFunc {
 
 func GetYoutubeLinks(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var links []domain.YoutubeLink
+		var (
+			links      []domain.YoutubeLink
+			page       int
+			limit      int
+			offset     int
+			totalCount int64
+		)
+
+		page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+		if err != nil || page < 1 {
+			page = 1
+		}
+
+		limit, err = strconv.Atoi(c.DefaultQuery("limit", "10"))
+		if err != nil || limit < 1 {
+			limit = 10
+		}
+
+		offset = (page - 1) * limit
 
 		// Fetch all YouTube links from the database
-		if err := db.Order("created_at desc").Find(&links).Error; err != nil {
+		if err := db.Model(&domain.YoutubeLink{}).Count(&totalCount).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to count"})
+			return
+		}
+
+		if err := db.Order("created_at desc").Limit(limit).Offset(offset).Find(&links).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch YouTube links"})
 			return
 		}
 
 		// Respond with JSON containing YouTube links
-		c.JSON(http.StatusOK, links)
+		c.JSON(http.StatusOK, gin.H{
+			"links":      links,
+			"totalCount": totalCount,
+		})
 	}
 }
 
@@ -1038,12 +1259,6 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 		car.RegNo = c.PostForm("regno")
 		car.Status = c.PostForm("status")
 		car.Price, _ = strconv.Atoi(c.PostForm("price"))
-		fmt.Println("here is teh price")
-		form, err := c.MultipartForm()
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get the form"})
-			return
-		}
 
 		// Handle banner image upload if provided
 		bannerImage, err := c.FormFile("bannerimage")
@@ -1066,36 +1281,70 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		// Handle the new images update
-		files := form.File["images[]"]
-		fmt.Println("here is the files", files)
-		var images []domain.Image
+		form, err := c.MultipartForm()
+		if err == nil {
+			files := form.File["images[]"]
+			var newImages []domain.Image
 
-		for _, file := range files {
-			filename := filepath.Base(fmt.Sprintf("%d_%d_%s", car.ID, time.Now().UnixNano(), file.Filename))
-			uploadPath := filepath.Join("uploads", filename)
-			if err := c.SaveUploadedFile(file, uploadPath); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save the image"})
-				return
+			for _, file := range files {
+				filename := filepath.Base(fmt.Sprintf("%d_%d_%s", car.ID, time.Now().UnixNano(), file.Filename))
+				uploadPath := filepath.Join("uploads", filename)
+				if err := c.SaveUploadedFile(file, uploadPath); err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save the image"})
+					return
+				}
+				imagePath := "/" + strings.ReplaceAll(uploadPath, "\\", "/")
+				newImages = append(newImages, domain.Image{Path: imagePath})
 			}
-			imagePath := "/" + strings.ReplaceAll(uploadPath, "\\", "/")
-			images = append(images, domain.Image{Path: imagePath})
+
+			if len(newImages) > 0 {
+				car.Images = append(car.Images, newImages...)
+			}
 		}
 
-		// Update the car's images if new images are uploaded
-		if len(images) > 0 {
-			// Delete existing images from the file system and the database
+		// Handle image deletion if requested
+		deleteImageIDs := c.PostFormArray("delete_images")
+		if len(deleteImageIDs) > 0 {
+			var remainingImages []domain.Image
 			for _, img := range car.Images {
-				if err := deleteFile(strings.TrimPrefix(img.Path, "/")); err != nil {
-					fmt.Println("Failed to delete old image:", err)
+				shouldDelete := false
+				for _, id := range deleteImageIDs {
+					if strconv.Itoa(int(img.ID)) == id {
+						shouldDelete = true
+						break
+					}
+				}
+				if !shouldDelete {
+					remainingImages = append(remainingImages, img)
+				} else {
+					// Delete image from filesystem if needed
+					if err := deleteFile(strings.TrimPrefix(img.Path, "/")); err != nil {
+						fmt.Println("Failed to delete image:", err)
+					}
+					// Also, delete the image from the database
+					db.Delete(&img)
 				}
 			}
+			car.Images = remainingImages
+		}
 
-			if err := db.Where("car_id = ?", car.ID).Delete(&domain.Image{}).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete existing images"})
-				return
+		// Handle image replacement
+		for _, img := range car.Images {
+			file, err := c.FormFile(fmt.Sprintf("replace_image_%d", img.ID))
+			if err == nil {
+				// Delete the old image from filesystem
+				if err := deleteFile(strings.TrimPrefix(img.Path, "/")); err != nil {
+					fmt.Println("Failed to delete image:", err)
+				}
+				// Save the new image
+				uploadPath := filepath.Join("uploads", fmt.Sprintf("%d_%d_%s", car.ID, time.Now().UnixNano(), file.Filename))
+				if err := c.SaveUploadedFile(file, uploadPath); err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save the image"})
+					return
+				}
+				img.Path = "/" + strings.ReplaceAll(uploadPath, "\\", "/")
+				db.Save(&img) // Save the updated path to the database
 			}
-			// Save new images
-			car.Images = images
 		}
 
 		brandID, err := strconv.ParseUint(c.PostForm("brand"), 10, 64)
@@ -1103,8 +1352,7 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid brand ID"})
 			return
 		}
-		car.Brand.ID = uint(brandID)
-		fmt.Println("here is the brand id coming", car.BrandID)
+		car.BrandID = uint(brandID)
 
 		// Save the updated car details
 		if err := db.Save(&car).Error; err != nil {

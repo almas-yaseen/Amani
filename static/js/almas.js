@@ -1,4 +1,8 @@
-        // Function to add a new file input
+
+
+
+
+// Function to add a new file input
         function addImageInput() {
             const container = document.getElementById('imageInputsContainer');
             const newInput = document.createElement('input');
@@ -8,13 +12,10 @@
             newInput.accept = 'image/*';
             container.appendChild(newInput);
         }
-    
         // Event listener to handle click on the "Add Another Image" button
         document.getElementById('addImageInput').addEventListener('click', function() {
             addImageInput();
-        });
-    
-        // Event listener to handle change in file inputs
+        });// Event listener to handle change in file inputs
         document.getElementById('imageInputsContainer').addEventListener('change', function(event) {
             if (event.target && event.target.classList.contains('image-input')) {
                 const files = event.target.files;
@@ -33,7 +34,7 @@
                 }
             }
         });
-    
+
         // Event listener to handle PDF generation button click
         document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("generateReportButton").addEventListener("click", function() {

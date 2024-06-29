@@ -180,6 +180,18 @@
                     <small>Dashboard</small> <sup></sup>
                 </div>
             </a>
+            <a class="sidebar-brand d-flex align-items-center justify-content-around w-full"
+            href="/admin/get_brand_page">
+            <div style="font-size: 1rem;" class=" font-weight-normal">
+                <i class="fa fa-bold" aria-hidden="true"></i>
+
+            </div>
+            <div class="sidebar-brand-text font-weight-normal btn btn-sm btn-outline-light ">
+                <small>Brands</small> <sup></sup>
+            </div>
+        </a>
+
+
 
             <a class="sidebar-brand d-flex align-items-center justify-content-around w-full"
                 href="/admin/get_youtube_link_form">
@@ -191,14 +203,14 @@
                 </div>
             </a>
 
-            <a class="sidebar-brand d-flex align-items-center justify-content-around w-full"
-                href="/admin/get_brand_page">
-                <div style="font-size: 1rem;" class=" font-weight-normal">
-                    <i class="fa fa-bold" aria-hidden="true"></i>
+        
 
+            <a class="sidebar-brand d-flex align-items-center justify-content-around w-full" href="/admin/get_uploads_page">
+                <div style="font-size: 1rem;" class="font-weight-normal">
+                    <i class="fa fa-truck" aria-hidden="true"></i>
                 </div>
-                <div class="sidebar-brand-text font-weight-normal btn btn-sm btn-outline-light ">
-                    <small>Brands</small> <sup></sup>
+                <div class="sidebar-brand-text font-weight-normal btn btn-sm btn-outline-light">
+                    <small>Delivery</small> <sup></sup>
                 </div>
             </a>
 
@@ -353,14 +365,17 @@
                                                 <td>{{.Price}}</td>
                                                 <td><img src="{{.Bannerimage}}" alt="Banner Image" class="square-image"
                                                         style="max-width: 50px; height: auto;"></td>
-                                                <td>
-                                                    <div class="image-field">
-                                                        {{with index .Images 0}}
-                                                        <img src="{{.Path}}" alt="Car Image" class="square-image"
-                                                            style="max-width: 50px; height: auto;">
-                                                        {{end}}
-                                                    </div>
-                                                </td>
+                                                        <td>
+                                                            <div class="image-field">
+                                                                {{ if gt (len .Images) 0 }}
+                                                                    <img src="{{ (index .Images 0).Path }}" alt="Car Image" class="square-image" style="max-width: 50px; height: auto;">
+                                                                {{ else }}
+                                                                    <p>No image available</p>
+                                                                {{ end }}
+                                                            </div>
+                                                        </td>
+                                                        
+                                                        
                                                 <td>{{.RegNo}}</td>
                                                 <td>{{.Status}}</td>
                                                 <td>{{.Engine_size}}</td>
@@ -513,17 +528,18 @@
                                                             <option value="{{.}}">{{.}}</option>
                                                             {{end}}
                                                         </select>
-                                                    </div>
+                                                      </div>
 
 
 
                                                     <div class="form-group">
                                                         <label>Banner image</label>
-                                                        <input type="file" name="bannerimage" accept="image/*" required>
+                                                        <input type="file"  id="bannerImageInput"  name="bannerimage" accept="image/*" required>
                                                         <a href="https://www.remove.bg/upload" target="blank">
                                                             <p><strong> Dont forget to click here Click here to remove
                                                                     background<strong></p>
                                                         </a>
+                                                        <div id="PreviousImage"></div>
 
                                                     </div>
                                                     <div class="form-group">
@@ -616,6 +632,24 @@
             <!-- <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a> -->
+    <script>
+        document.getElementById('bannerImageInput').addEventListener('change', function(event) {
+            const imagePreview = document.getElementById('PreviousImage');
+            imagePreview.innerHTML = ''; // Clear previous preview
+
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style = 'width:50px;height:50px'
+                    imagePreview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
 
 
             <script src="/static/js/almas.js"></script>
