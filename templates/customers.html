@@ -234,89 +234,110 @@
         </div>
 
         <!-- Table example -->
-        <div class="row ">
+        <div class="row">
           <div style="max-width: 100%;overflow-x: scroll;" class="container">
-        <div class="table-responsive mt-3">
-          <div class="table-wrapper">
-            <div class="table-title">
-            <div class="row">
-                <div class="col-sm-6">
-                    <h2>Customer <b>Delivery</b></h2>
-                </div>
-            </div>
-            <div class="row pt-2"></div>
-        </div>
-          <table class="table">
-              <thead>
-                  <tr>
-                      <th scope="col">#</th>
-                      <th scope="col">Customer image</th>
-                      <th scope="col">Edit</th>
-                      <th scope="col">Delete</th>
-                  </tr>
-              </thead>
-              <tbody>
-                {{ range $index, $image := .Images }}
-                <tr>
-                  <th scope="row">{{ $index }}</th>
-                  <td>
-                    <img src="/{{ $image.Path }}" alt="Customer Image" style="max-width: 50px;"/>
-                  </td>
-                  <td>
-                    <!-- Button to trigger the modal -->
-                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#editModal{{ $image.ID }}">
-                      Edit
-                    </button>
-                    <!-- Modal -->
-                    <div class="modal fade" id="editModal{{ $image.ID }}" tabindex="-1" role="dialog"
-                      aria-labelledby="editModalLabel{{ $image.ID }}" aria-hidden="true">
-                      <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h5 class="modal-title" id="editModalLabel{{ $image.ID }}">Edit Customer Image</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                              <span aria-hidden="true">&times;</span>
-                            </button>
-                          </div>
-                          <div class="modal-body">
-                            <div class="form-group">
-                <label>Current Image</label>
-                <div>
-                  <img src="/{{ $image.Path }}" alt="Customer Image" style="max-width: 100px;"/>
-                </div>
-              </div>
-                            <!-- Form to edit the image -->
-                            <form action="/admin/edit_customer_image/{{ $image.ID }}" method="POST" enctype="multipart/form-data">
-                              <div class="form-group">
-                                <label for="editImage">Customer Image</label>
-                                <input type="file" class="form-control" id="editImage{{ $image.ID }}" name="image" onchange="previewImage(event, {{ $image.ID }})" />
-                                <div id="newImagePreview{{ $image.ID }}" style="margin-top: 10px;">
-                                  <img id="newImage{{ $image.ID }}" style="max-width: 100px;" />
-                                
+              <div class="table-responsive mt-3">
+                  <div class="table-wrapper">
+                      <div class="table-title">
+                          <div class="row">
+                              <div class="col-sm-6">
+                                  <h2>Customer <b>Delivery</b></h2>
                               </div>
-                              <button type="submit" class="btn btn-primary">Save Changes</button>
-                            </form>
                           </div>
-                        </div>
+                          <div class="row pt-2"></div>
                       </div>
-                    </div>
-                  </td>
-                  <td>
-                    <!-- Form to delete the image -->
-                    <form action="/admin/delete_customer_image/{{ $image.ID }}" method="POST">
-                      <button type="submit" class="btn btn-danger">Delete</button>
-                    </form>
-                  </td>
-                </tr>
-                {{ end }}
-              </tbody>
-          </table>
+                      <table class="table">
+                          <thead>
+                              <tr>
+                                  <th scope="col">#</th>
+                                  <th scope="col">Customer image</th>
+                                  <th scope="col">Edit</th>
+                                  <th scope="col">Delete</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              {{ range $index, $image := .Images }}
+                              <tr>
+                                  <th scope="row">{{ $index }}</th>
+                                  <td>
+                                      <img src="/{{ $image.Path }}" alt="Customer Image" style="max-width: 50px;" />
+                                  </td>
+                                  <td>
+                                      <!-- Button to trigger the modal -->
+                                      <button type="button" class="btn btn-success" data-toggle="modal" data-target="#editModal{{ $image.ID }}">
+                                          Edit
+                                      </button>
+                                      <!-- Edit Modal -->
+                                      <div class="modal fade" id="editModal{{ $image.ID }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel{{ $image.ID }}" aria-hidden="true">
+                                          <div class="modal-dialog" role="document">
+                                              <div class="modal-content">
+                                                  <div class="modal-header">
+                                                      <h5 class="modal-title" id="editModalLabel{{ $image.ID }}">Edit Customer Image</h5>
+                                                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                          <span aria-hidden="true">&times;</span>
+                                                      </button>
+                                                  </div>
+                                                  <div class="modal-body">
+                                                      <div class="form-group">
+                                                          <label>Current Image</label>
+                                                          <div>
+                                                              <img src="/{{ $image.Path }}" alt="Customer Image" style="max-width: 100px;" />
+                                                          </div>
+                                                      </div>
+                                                      <!-- Form to edit the image -->
+                                                      <form action="/admin/edit_customer_image/{{ $image.ID }}" method="POST" enctype="multipart/form-data">
+                                                          <div class="form-group">
+                                                              <label for="editImage">Customer Image</label>
+                                                              <input type="file" class="form-control" id="editImage{{ $image.ID }}" name="image" onchange="previewImage(event, {{ $image.ID }})" />
+                                                              <div id="newImagePreview{{ $image.ID }}" style="margin-top: 10px;">
+                                                                  <img id="newImage{{ $image.ID }}" style="max-width: 100px;" />
+                                                              </div>
+                                                          </div>
+                                                          <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                      </form>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </td>
+                                  <td>
+                                      <!-- Button to trigger delete confirmation modal -->
+                                      <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal{{ $image.ID }}">
+                                          Delete
+                                      </button>
+                                      <!-- Delete Confirmation Modal -->
+                                      <div class="modal fade" id="deleteModal{{ $image.ID }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ $image.ID }}" aria-hidden="true">
+                                          <div class="modal-dialog" role="document">
+                                              <div class="modal-content">
+                                                  <div class="modal-header">
+                                                      <h5 class="modal-title" id="deleteModalLabel{{ $image.ID }}">Delete Confirmation</h5>
+                                                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                          <span aria-hidden="true">&times;</span>
+                                                      </button>
+                                                  </div>
+                                                  <div class="modal-body">
+                                                      Are you sure you want to delete this image?
+                                                  </div>
+                                                  <div class="modal-footer">
+                                                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                      <!-- Form to delete the image -->
+                                                      <form action="/admin/delete_customer_image/{{ $image.ID }}" method="POST">
+                                                          <button type="submit" class="btn btn-danger">Delete</button>
+                                                      </form>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </td>
+                              </tr>
+                              {{ end }}
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
           </div>
-         
-        
       </div>
-    </div>
-    </div>
+      
       
 
         <!-- Begin Page Content -->
