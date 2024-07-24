@@ -789,10 +789,6 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		//--> this one for   fetch the brand seperately
-		if err := db.Find(&brands).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch brands"})
-			return
-		}
 
 		// Fetch associated images for each car (if Image is a related entity)
 		for i := range cars {
@@ -1024,11 +1020,13 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 			BannerImage string `json:"bannerImage"`
 			Brand       string `json:"brand"`
 			Id          int    `json:"id"`
-			Year        int    `json:"year"`
-			Model       string `json:"model"`
-			Variant     string `json:"variant"`
-			Price       int    `json:"price"`
-			Color       string `json:"color"`
+			Cartype     string `json:"car_type"`
+
+			Year    int    `json:"year"`
+			Model   string `json:"model"`
+			Variant string `json:"variant"`
+			Price   int    `json:"price"`
+			Color   string `json:"color"`
 		}
 
 		var carDetails []CarDetail
@@ -1040,6 +1038,7 @@ func Get_Banner_Vehicles(db *gorm.DB) gin.HandlerFunc {
 				Variant:     car.Variant,
 				Price:       car.Price,
 				Color:       car.Color,
+				Cartype:     car.CarType,
 				Brand:       car.Brand.Name,
 				Year:        int(car.Year),
 				Id:          int(car.ID),
