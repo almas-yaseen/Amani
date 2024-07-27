@@ -200,8 +200,7 @@
                                                     <label for="inputEmail4">Brand</label>
                                                     <select id="brand" name="brand" class="form-control">
                                                         {{range .Brands}}
-                                                        <option value="{{.ID}}" {{if eq .ID
-                                                            $.Car.BrandID}}selected{{end}}>{{.Name}}
+                                                        <option value="{{.ID}}" {{if eq .ID $.Car.BrandID}}selected{{end}}>{{.Name}}
                                                         </option>
                                                         {{end}}
                                                     </select>
@@ -276,10 +275,8 @@
                                                 <div class="form-group">
                                                     <label>Status</label>
                                                     <select name="status" class="form-control" required>
-                                                        <option value="sold" {{if eq .Car.Status "sold"
-                                                            }}selected{{end}}>Sold</option>
-                                                        <option value="available" {{if eq .Car.Status "available"
-                                                            }}selected{{end}}>
+                                                        <option value="sold" {{if eq .Car.Status "sold" }}selected{{end}}>Sold</option>
+                                                        <option value="available" {{if eq .Car.Status "available" }}selected{{end}}>
                                                             Available</option>
                                                     </select>
 
