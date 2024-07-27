@@ -54,7 +54,7 @@ func main() {
 
 	routes.AdminRoutes(router.Group(""), db)
 
-	err = router.Run("localhost:9090")
+	err = router.Run("localhost:8080")
 	if err != nil {
 		log.Fatalf("localhost error  %v", err)
 	}
