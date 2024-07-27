@@ -782,6 +782,11 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		if err := db.Find(&brands).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch"})
+			return
+		}
+
 		// Fetch total count of cars (for pagination)
 		if err := db.Model(&domain.Car{}).Count(&totalCount).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch total count"})
@@ -1287,6 +1292,7 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 
 			for _, file := range files {
 				filename := filepath.Base(fmt.Sprintf("%d_%d_%s", car.ID, time.Now().UnixNano(), file.Filename))
+				fmt.Println("here is the filename come on", file.Filename)
 				uploadPath := filepath.Join("uploads", filename)
 				if err := c.SaveUploadedFile(file, uploadPath); err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save the image"})
@@ -1314,8 +1320,10 @@ func EditCar(db *gorm.DB) gin.HandlerFunc {
 					}
 				}
 				if !shouldDelete {
+					fmt.Println("here is the shoudld not delete come on baba")
 					remainingImages = append(remainingImages, img)
 				} else {
+					fmt.Println("lasndcjklnasjkdcnaksjdnckjlasndcjkasndckasdc")
 					// Delete image from filesystem if needed
 					if err := deleteFile(strings.TrimPrefix(img.Path, "/")); err != nil {
 						fmt.Println("Failed to delete image:", err)
