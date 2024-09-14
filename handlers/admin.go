@@ -1164,10 +1164,8 @@ func AddCar(db *gorm.DB) gin.HandlerFunc {
 
 		// Handle banner image upload
 		bannerImage, err := c.FormFile("bannerimage")
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get the banner image"})
-			return
-		}
+		fmt.Println("here is the banner image", bannerImage)
+
 		bannerImagePath := filepath.Join("uploads", fmt.Sprintf("%d_%s", time.Now().UnixNano(), bannerImage.Filename))
 		if err := c.SaveUploadedFile(bannerImage, bannerImagePath); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save the banner image"})
@@ -1182,6 +1180,9 @@ func AddCar(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 		files := form.File["images[]"]
+
+		fmt.Println("here is the files", files)
+
 		var images []domain.Image
 
 		for _, file := range files {
